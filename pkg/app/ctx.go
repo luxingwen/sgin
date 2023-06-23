@@ -1,11 +1,7 @@
 package app
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"sgin/pkg/config"
 	"sgin/pkg/logger"
 	"sgin/pkg/redisop"
@@ -48,51 +44,4 @@ func (app *App) Wrap(hf HandlerFunc) gin.HandlerFunc {
 		}
 		hf(cc)
 	}
-}
-
-type Response struct {
-	TraceID string      `json:"trace_id"`
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-func (ctx *Context) JSONSuccess(data interface{}) {
-	response := Response{
-		TraceID: ctx.TraceID,
-		Code:    http.StatusOK,
-		Message: "Success",
-		Data:    data,
-	}
-
-	ctx.JSON(http.StatusOK, response)
-}
-
-func (ctx *Context) JSONError(code int, message string) {
-	response := Response{
-		TraceID: ctx.TraceID,
-		Code:    code,
-		Message: message,
-		Data:    nil,
-	}
-
-	ctx.JSON(http.StatusOK, response)
-}
-
-func (ctx *Context) ReturnWithStream_ObjTxt(data interface{}) {
-	response := Response{
-		TraceID: ctx.TraceID,
-		Code:    http.StatusOK,
-		Message: "Success",
-		Data:    data,
-	}
-	dataByte, _ := json.Marshal(response)
-	respData := string(dataByte)
-	var fullData []byte
-	fullData = append(fullData, respData...)
-	fullData = append(fullData, []byte("\n\n")...)
-	resp := bytes.NewBuffer(fullData)
-	fmt.Fprintf(ctx.Writer, "%s", resp)
-	ctx.Writer.(http.Flusher).Flush()
-	return
 }
