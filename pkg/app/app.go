@@ -27,11 +27,13 @@ type AppRouterGroup struct {
 func NewApp() *App {
 	app := &App{}
 	app.Config = config.GetConfig()
-	app.DB = db.GetDB(app.Config.MySQL)
+	if app.Config.MySQL.Host != "" {
+		app.DB = db.GetDB(app.Config.MySQL)
+	}
 
 	app.Logger = logger.NewLogger(app.Config.LogConfig)
 
-	if app.Config.MySQL.ShowSQL {
+	if app.Config.MySQL.ShowSQL && app.DB != nil {
 
 		gormLogger := glogger.New(
 			app.Logger,

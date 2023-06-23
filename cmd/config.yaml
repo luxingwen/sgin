@@ -1,0 +1,10 @@
+LogConfig:
+  Level: "info"
+  Format: "console"
+  File: "app.log"
+  MaxSize: 10
+  MaxAge: 7
+  Compress: true
+  Filename: "app.log"
+  ResponseSize: 1000
+  ShowConsole: true

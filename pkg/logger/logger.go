@@ -76,3 +76,9 @@ func getLogWriter(config config.LogConfig) zapcore.WriteSyncer {
 func (l *Logger) Printf(format string, args ...interface{}) {
 	l.Infof(format, args...)
 }
+
+// Write 实现了 io.Writer 接口的方法
+func (l *Logger) Write(p []byte) (n int, err error) {
+	l.Info(string(p))
+	return len(p), nil
+}
