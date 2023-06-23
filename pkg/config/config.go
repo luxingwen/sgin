@@ -14,6 +14,11 @@ type Config struct {
 	TencentCloud    TencenCloudConfig
 	PkgFileDir      string
 	UserInfoAddress string
+	Upload          UploadConfig
+}
+
+type UploadConfig struct {
+	Dir string
 }
 
 type LogConfig struct {
