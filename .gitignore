@@ -2,3 +2,4 @@ cmd/cmd.exe
 *.log
 cmd/cmd
 vendor
+docs
