@@ -3,3 +3,4 @@ cmd/cmd.exe
 cmd/cmd
 vendor
 docs
+*.exe
