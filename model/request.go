@@ -46,3 +46,8 @@ type ReqMenuQueryParam struct {
 type ReqUserDeleteParam struct {
 	Uuid string `json:"uuid" binding:"required"`
 }
+
+// 删除菜单参数
+type ReqMenuDeleteParam struct {
+	Uuid string `json:"uuid" binding:"required"`
+}
