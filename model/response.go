@@ -6,3 +6,7 @@ type PagedResponse struct {
 	PageSize int         `json:"pageSize"`
 	Total    int64       `json:"total"`
 }
+
+type ResUserLogin struct {
+	Token string `json:"token"`
+}

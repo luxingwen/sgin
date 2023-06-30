@@ -15,6 +15,7 @@ type Config struct {
 	PkgFileDir      string
 	UserInfoAddress string
 	Upload          UploadConfig
+	PasswdKey       string // 密码加密key
 }
 
 type UploadConfig struct {

@@ -6,6 +6,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+const (
+	secretKey = "your-secret-key"
+)
+
 // GenerateToken 生成 JWT token
 func GenerateToken(userID string) (string, error) {
 	// 定义 JWT 的有效期限
@@ -21,7 +25,7 @@ func GenerateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// 使用密钥对 token 进行签名，生成字符串格式的 token
-	tokenString, err := token.SignedString([]byte("your-secret-key")) // 使用与验证时相同的密钥
+	tokenString, err := token.SignedString([]byte(secretKey)) // 使用与验证时相同的密钥
 	if err != nil {
 		return "", err
 	}

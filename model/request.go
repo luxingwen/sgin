@@ -15,3 +15,10 @@ type ReqRoleQueryParam struct {
 	IsActive bool   `form:"is_active"`
 	Pagination
 }
+
+type ReqUserLogin struct {
+	// 用户名或邮箱
+	Username string `json:"username" binding:"required"`
+	// 密码
+	Password string `json:"password" binding:"required"`
+}

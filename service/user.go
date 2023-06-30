@@ -62,3 +62,17 @@ func (s *UserService) DeleteUser(ctx *app.Context, uuid string) error {
 
 	return nil
 }
+
+// 根据用户名或邮箱获取用户
+func (s *UserService) GetUserByUsernameOrEmail(ctx *app.Context, usernameOrEmail string) (*model.User, error) {
+	user := &model.User{}
+	err := ctx.DB.Where("username = ? OR email = ?", usernameOrEmail, usernameOrEmail).First(user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("user not found")
+		}
+		ctx.Logger.Error("Failed to get user by username or email", err)
+		return nil, errors.New("failed to get user by username or email")
+	}
+	return user, nil
+}
