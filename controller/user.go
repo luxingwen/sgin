@@ -13,14 +13,14 @@ type UserController struct {
 }
 
 // CreateUser creates a new User.
-// @Summary Create a new user
+// @Summary 创建用户
 // @Description Create a new user with the input payload
-// @Tags Users
+// @Tags 用户
 // @Accept  json
 // @Produce  json
 // @Param user body model.User true "Create user"
 // @Success 200 {object} model.User "Successfully created user"
-// @Router /users [post]
+// @Router /user/create [post]
 func (uc *UserController) CreateUser(c *app.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -37,18 +37,22 @@ func (uc *UserController) CreateUser(c *app.Context) {
 }
 
 // GetUserByUUID gets a User by UUID.
-// @Summary Get a user by UUID
+// @Summary 获取用户信息
 // @Description Get a user by its UUID
-// @Tags Users
+// @Tags 用户
 // @Accept  json
 // @Produce  json
-// @Param uuid path string true "User's UUID"
+// @Param params body model.ReqUserQueryParam false "查询参数"
 // @Success 200 {object} model.User "Successfully fetched user data"
-// @Router /users/{uuid} [get]
+// @Router /user/info [post]
 func (uc *UserController) GetUserByUUID(c *app.Context) {
-	uuid := c.Param("uuid")
+	param := &model.ReqUserQueryParam{}
+	if err := c.ShouldBindJSON(param); err != nil {
+		c.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
 
-	user, err := uc.Service.GetUserByUUID(c, uuid)
+	user, err := uc.Service.GetUserByUUID(c, param.Uuid)
 	if err != nil {
 		c.JSONError(http.StatusInternalServerError, err.Error())
 		return
@@ -57,14 +61,14 @@ func (uc *UserController) GetUserByUUID(c *app.Context) {
 }
 
 // UpdateUser updates an existing User.
-// @Summary Update a user
+// @Summary 更新用户
 // @Description Update a user with the input payload
-// @Tags Users
+// @Tags 用户
 // @Accept  json
 // @Produce  json
 // @Param user body model.User true "Update user"
 // @Success 200 {object} model.User "Successfully updated user"
-// @Router /users [put]
+// @Router /user/update [post]
 func (uc *UserController) UpdateUser(c *app.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -81,18 +85,22 @@ func (uc *UserController) UpdateUser(c *app.Context) {
 }
 
 // DeleteUser deletes a User by UUID.
-// @Summary Delete a user by UUID
+// @Summary 删除用户
 // @Description Delete a user by its UUID
-// @Tags Users
+// @Tags 用户
 // @Accept  json
 // @Produce  json
-// @Param uuid path string true "User's UUID"
+// @Param params body model.ReqUserDeleteParam true "Delete user"
 // @Success 200 {string} string "Successfully deleted user"
-// @Router /users/{uuid} [delete]
+// @Router /user/delete [post]
 func (uc *UserController) DeleteUser(c *app.Context) {
-	uuid := c.Param("uuid")
+	params := &model.ReqUserDeleteParam{}
+	if err := c.ShouldBindJSON(params); err != nil {
+		c.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
 
-	err := uc.Service.DeleteUser(c, uuid)
+	err := uc.Service.DeleteUser(c, params.Uuid)
 	if err != nil {
 		c.JSONError(http.StatusInternalServerError, err.Error())
 		return

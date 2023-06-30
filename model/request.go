@@ -32,6 +32,7 @@ type ReqUserQueryParam struct {
 	Sex      int    `json:"sex"`
 	Username string `json:"username"`
 	Status   int    `json:"status"`
+	Uuid     string `json:"uuid"`
 	Pagination
 }
 
@@ -39,4 +40,9 @@ type ReqUserQueryParam struct {
 type ReqMenuQueryParam struct {
 	Name string `json:"name"`
 	Pagination
+}
+
+// 删除用户删除参数
+type ReqUserDeleteParam struct {
+	Uuid string `json:"uuid" binding:"required"`
 }
