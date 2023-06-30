@@ -16,6 +16,7 @@ type Config struct {
 	UserInfoAddress string
 	Upload          UploadConfig
 	PasswdKey       string // 密码加密key
+	MailConfig      MailConfig
 }
 
 type UploadConfig struct {
@@ -47,6 +48,14 @@ type TencenCloudConfig struct {
 	SecretKey   string
 	Region      string
 	FileAddress string
+}
+
+// 邮件配置
+type MailConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
 }
 
 type SmartGptConfig struct {

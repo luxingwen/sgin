@@ -76,3 +76,43 @@ func (s *UserService) GetUserByUsernameOrEmail(ctx *app.Context, usernameOrEmail
 	}
 	return user, nil
 }
+
+// 获取用户列表
+func (s *UserService) GetUserList(ctx *app.Context, params *model.ReqUserQueryParam) (r *model.PagedResponse, err error) {
+	var users []*model.User
+	var total int64
+	db := ctx.DB.Model(&model.User{})
+	if params.Username != "" {
+		db = db.Where("username = ?", params.Username)
+	}
+	if params.Email != "" {
+		db = db.Where("email = ?", params.Email)
+	}
+	if params.Phone != "" {
+		db = db.Where("phone = ?", params.Phone)
+	}
+	if params.Status != 0 {
+		db = db.Where("status = ?", params.Status)
+	}
+
+	if params.StartTime != "" {
+		db = db.Where("created_at >= ?", params.StartTime)
+	}
+	if params.EndTime != "" {
+		db = db.Where("created_at <= ?", params.EndTime)
+	}
+	err = db.Count(&total).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get user list", err)
+		return nil, errors.New("failed to get user list")
+	}
+	err = db.Offset(params.GetOffset()).Limit(params.PageSize).Find(&users).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get user list", err)
+		return nil, errors.New("failed to get user list")
+	}
+	return &model.PagedResponse{
+		Total: total,
+		Data:  users,
+	}, nil
+}

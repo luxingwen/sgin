@@ -99,3 +99,27 @@ func (uc *UserController) DeleteUser(c *app.Context) {
 	}
 	c.JSONSuccess("User deleted successfully")
 }
+
+// 获取用户列表
+// @Summary 获取用户列表
+// @Tags 用户
+// @Accept json
+// @Produce json
+// @Param params body model.ReqUserQueryParam true "获取用户列表参数"
+// @Success 200 {object} model.PagedResponse
+// @Router /user/list [post]
+func (uc *UserController) GetUserList(c *app.Context) {
+	param := &model.ReqUserQueryParam{}
+	if err := c.ShouldBindJSON(param); err != nil {
+		c.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	users, err := uc.Service.GetUserList(c, param)
+	if err != nil {
+		c.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSONSuccess(users)
+}

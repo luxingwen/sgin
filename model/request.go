@@ -1,8 +1,10 @@
 package model
 
 type Pagination struct {
-	PageSize int `form:"pageSize"`
-	Current  int `form:"current"`
+	PageSize  int    `form:"pageSize" json:"pageSize"`
+	Current   int    `form:"current" json:"current"`
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 }
 
 func (p *Pagination) GetOffset() int {
@@ -21,4 +23,14 @@ type ReqUserLogin struct {
 	Username string `json:"username" binding:"required"`
 	// 密码
 	Password string `json:"password" binding:"required"`
+}
+
+type ReqUserQueryParam struct {
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Nickname string `json:"nickname"`
+	Sex      int    `json:"sex"`
+	Username string `json:"username"`
+	Status   int    `json:"status"`
+	Pagination
 }
