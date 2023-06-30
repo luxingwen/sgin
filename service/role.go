@@ -62,3 +62,32 @@ func (s *RoleService) DeleteRole(ctx *app.Context, uuid string) error {
 
 	return nil
 }
+
+// 查询角色列表
+func (s *RoleService) GetRoleList(ctx *app.Context, param *model.ReqRoleQueryParam) (r *model.PagedResponse, err error) {
+	roles := make([]*model.Role, 0)
+	query := ctx.DB.Model(&model.Role{})
+	if param.Name != "" {
+		query = query.Where("name like ?", "%"+param.Name+"%")
+	}
+	if param.IsActive {
+		query = query.Where("is_active = ?", param.IsActive)
+	}
+	var total int64
+	err = query.Count(&total).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get role count", err)
+		return nil, errors.New("failed to get role count")
+	}
+	err = query.Limit(param.PageSize).Offset(param.GetOffset()).Find(&roles).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get role list", err)
+		return nil, errors.New("failed to get role list")
+	}
+	return &model.PagedResponse{
+		Data:     roles,
+		Current:  param.Current,
+		PageSize: param.PageSize,
+		Total:    total,
+	}, nil
+}

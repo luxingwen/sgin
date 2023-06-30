@@ -8,6 +8,7 @@ import (
 	"sgin/controller"
 	"sgin/pkg/app"
 	"sgin/pkg/config"
+	"sgin/routers"
 	"sgin/service"
 	"syscall"
 	"time"
@@ -36,6 +37,8 @@ func main() {
 	config.InitConfig()
 	serverApp := app.NewApp()
 	serverApp.Use(app.RecoveryWithWriter(serverApp.Logger))
+
+	routers.InitRouter(serverApp)
 
 	serverApp.GET("/ping", func(ctx *app.Context) {
 		panic("test panic")
