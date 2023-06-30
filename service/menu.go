@@ -62,3 +62,34 @@ func (s *MenuService) DeleteMenu(ctx *app.Context, uuid string) error {
 
 	return nil
 }
+
+// 获取菜单列表
+func (s *MenuService) GetMenuList(ctx *app.Context, params *model.ReqMenuQueryParam) (r *model.PagedResponse, err error) {
+	var (
+		menus []*model.Menu
+		total int64
+	)
+
+	db := ctx.DB.Model(&model.Menu{})
+
+	if params.Name != "" {
+		db = db.Where("name LIKE ?", "%"+params.Name+"%")
+	}
+
+	err = db.Count(&total).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get menu count", err)
+		return nil, errors.New("failed to get menu count")
+	}
+
+	err = db.Offset(params.GetOffset()).Limit(params.PageSize).Find(&menus).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get menu list", err)
+		return nil, errors.New("failed to get menu list")
+	}
+
+	return &model.PagedResponse{
+		Total: total,
+		Data:  menus,
+	}, nil
+}

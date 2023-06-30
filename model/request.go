@@ -34,3 +34,9 @@ type ReqUserQueryParam struct {
 	Status   int    `json:"status"`
 	Pagination
 }
+
+// 菜单查询参数
+type ReqMenuQueryParam struct {
+	Name string `json:"name"`
+	Pagination
+}
