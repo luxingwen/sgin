@@ -32,3 +32,37 @@ func GenerateToken(userID string) (string, error) {
 
 	return tokenString, nil
 }
+
+// ParseToken 解析 JWT token
+func ParseToken(tokenString string) (jwt.MapClaims, error) {
+	// 解析 token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil // 使用与生成 token 时相同的密钥
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取 token 中的声明部分
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, err
+	}
+
+	return claims, nil
+}
+
+// 解析token返回user_id
+func ParseTokenGetUserID(tokenString string) (string, error) {
+	claims, err := ParseToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+
+	userID, ok := claims["user_id"].(string)
+	if !ok {
+		return "", err
+	}
+
+	return userID, nil
+}

@@ -42,6 +42,19 @@ func (s *AppService) GetAppByUUID(ctx *app.Context, uuid string) (*model.App, er
 	return app, nil
 }
 
+func (s *AppService) GetAppByApiKey(ctx *app.Context, apikey string) (*model.App, error) {
+	app := &model.App{}
+	err := ctx.DB.Where("api_key = ?", apikey).First(app).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("app not found")
+		}
+		ctx.Logger.Error("Failed to get app by Apikey", err, "apikey:", apikey)
+		return nil, errors.New("failed to get app by apikey")
+	}
+	return app, nil
+}
+
 func (s *AppService) UpdateApp(ctx *app.Context, app *model.App) error {
 	app.UpdatedAt = time.Now()
 	err := ctx.DB.Save(app).Error

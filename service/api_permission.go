@@ -74,3 +74,17 @@ func (s *AppPermissionService) GetAppAPIPermissions(ctx *app.Context, appUUID st
 
 	return apis, nil
 }
+
+// 根据name ，path，method获取api 权限信息
+func (s *AppPermissionService) GetAPIPermissionByNamePathMethod(ctx *app.Context, appUUID, path, method string) (*model.AppPermission, error) {
+	appPermission := &model.AppPermission{}
+	err := ctx.DB.Where("app_uuid = ? and path = ? and method = ?", appUUID, path, method).First(appPermission).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("api permissions  not found")
+		}
+		ctx.Logger.Error("Failed to get api permissions by name path method", err)
+		return nil, errors.New("failed to get api permissions by name path method")
+	}
+	return appPermission, nil
+}
