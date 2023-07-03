@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"sgin/model"
@@ -83,7 +84,7 @@ func (s *UserService) GetUserList(ctx *app.Context, params *model.ReqUserQueryPa
 	var total int64
 	db := ctx.DB.Model(&model.User{})
 	if params.Username != "" {
-		db = db.Where("username = ?", params.Username)
+		db = db.Where("username LIKE ?", fmt.Sprintf("%%%s%%", params.Username))
 	}
 	if params.Email != "" {
 		db = db.Where("email = ?", params.Email)
@@ -112,7 +113,9 @@ func (s *UserService) GetUserList(ctx *app.Context, params *model.ReqUserQueryPa
 		return nil, errors.New("failed to get user list")
 	}
 	return &model.PagedResponse{
-		Total: total,
-		Data:  users,
+		Total:    total,
+		Data:     users,
+		Current:  params.Current,
+		PageSize: params.PageSize,
 	}, nil
 }

@@ -62,3 +62,33 @@ func (s *UserRoleService) DeleteUserRole(ctx *app.Context, uuid string) error {
 
 	return nil
 }
+
+// 获取用户的角色信息
+func (s *UserRoleService) GetUserRoleByUserID(ctx *app.Context, userID string) ([]*model.Role, error) {
+	var userRole []*model.UserRole
+	err := ctx.DB.Where("user_id = ?", userID).Find(&userRole).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("user role not found")
+		}
+		ctx.Logger.Error("Failed to get user role by user ID", err)
+		return nil, errors.New("failed to get user role by user ID")
+	}
+
+	var roleIDs []string
+	for _, v := range userRole {
+		roleIDs = append(roleIDs, v.RoleUUID)
+	}
+
+	var roles []*model.Role
+	err = ctx.DB.Where("uuid in ?", roleIDs).Find(&roles).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("role not found")
+		}
+		ctx.Logger.Error("Failed to get role by UUID", err)
+		return nil, errors.New("failed to get role by UUID")
+	}
+
+	return roles, nil
+}

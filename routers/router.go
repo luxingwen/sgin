@@ -4,16 +4,22 @@ import (
 	"sgin/controller"
 	"sgin/pkg/app"
 
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"sgin/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func InitRouter(ctx *app.App) {
 	InitSwaggerRouter(ctx)
+	InitUserRouter(ctx)
+	InitMenuRouter(ctx)
+	InitAppRouter(ctx)
+}
 
-	v1 := ctx.Group("/v1")
+func InitUserRouter(ctx *app.App) {
+	v1 := ctx.Group("/api/v1")
 	{
 		userController := &controller.UserController{
 			Service: &service.UserService{},
@@ -38,7 +44,10 @@ func InitRouter(ctx *app.App) {
 		v1.POST("/role/delete", roleController.DeleteRole)
 
 	}
+}
 
+func InitMenuRouter(ctx *app.App) {
+	v1 := ctx.Group("/api/v1")
 	{
 		menuController := &controller.MenuController{
 			MenuService: &service.MenuService{},
@@ -47,6 +56,20 @@ func InitRouter(ctx *app.App) {
 		v1.POST("/menu/list", menuController.GetMenuList)
 		v1.POST("/menu/update", menuController.UpdateMenu)
 		v1.POST("/menu/delete", menuController.DeleteMenu)
+	}
+}
+
+func InitAppRouter(ctx *app.App) {
+	v1 := ctx.Group("/api/v1")
+	{
+		appController := &controller.AppController{
+			AppService: &service.AppService{},
+		}
+		v1.POST("/app/list", appController.GetAppList)
+		v1.POST("/app/create", appController.CreateApp)
+		v1.POST("/app/update", appController.UpdateApp)
+		v1.POST("/app/delete", appController.DeleteApp)
+
 	}
 }
 

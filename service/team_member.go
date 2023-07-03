@@ -62,3 +62,35 @@ func (s *TeamMemberService) DeleteTeamMember(ctx *app.Context, uuid string) erro
 
 	return nil
 }
+
+// 获取团队成员用户列表
+func (s *TeamMemberService) GetTeamMemberUserList(ctx *app.Context, teamUUID string) ([]*model.User, error) {
+	var teamMembers []*model.TeamMember
+
+	err := ctx.DB.Where("team_uuid = ?", teamUUID).Find(&teamMembers).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("team member not found")
+		}
+		ctx.Logger.Error("Failed to get team member by UUID", err)
+		return nil, errors.New("failed to get team member by UUID")
+	}
+
+	var users []*model.User
+	var userIds []string
+	for _, teamMember := range teamMembers {
+		userIds = append(userIds, teamMember.UserUUID)
+	}
+
+	err = ctx.DB.Where("uuid in ?", userIds).Find(&users).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("user not found")
+		}
+		ctx.Logger.Error("Failed to get user by UUID", err)
+		return nil, errors.New("failed to get user by UUID")
+	}
+
+	return users, nil
+}

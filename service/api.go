@@ -62,3 +62,48 @@ func (s *APIService) DeleteAPI(ctx *app.Context, uuid string) error {
 
 	return nil
 }
+
+// 查询api列表
+func (s *APIService) GetAPIList(ctx *app.Context, params *model.ReqApiQueryParam) (r *model.PagedResponse, err error) {
+
+	var (
+		apis  []*model.API
+		total int64
+	)
+
+	query := ctx.DB.Model(&model.API{})
+	if params.Name != "" {
+		query = query.Where("name LIKE ?", "%"+params.Name+"%")
+	}
+
+	if params.Path != "" {
+		query = query.Where("path LIKE ?", "%"+params.Path+"%")
+	}
+
+	if params.Method != "" {
+		query = query.Where("method = ?", params.Method)
+	}
+
+	if params.Status > 0 {
+		query = query.Where("status = ?", params.Status)
+	}
+
+	err = query.Count(&total).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = query.Offset(params.GetOffset()).Limit(params.PageSize).Find(&apis).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get user list", err)
+		return nil, errors.New("failed to get user list")
+	}
+	return &model.PagedResponse{
+		Total:    total,
+		Data:     apis,
+		Current:  params.Current,
+		PageSize: params.PageSize,
+	}, nil
+
+}

@@ -51,3 +51,25 @@ type ReqUserDeleteParam struct {
 type ReqMenuDeleteParam struct {
 	Uuid string `json:"uuid" binding:"required"`
 }
+
+type ReqApiQueryParam struct {
+	Path   string `json:"path"`
+	Name   string `json:"name"`
+	Method string `json:"method"`
+	Status int    `json:"status"`
+	Pagination
+}
+
+// 查询app的参数
+type ReqAppQueryParam struct {
+	Name   string `json:"name"`
+	ApiKey string `json:"api_key"`
+	Status int    `json:"status"`
+	Pagination
+}
+
+// uuid参数
+type ReqUuidParam struct {
+	Uuid  string   `json:"uuid"`
+	Uuids []string `json:"uuids"`
+}

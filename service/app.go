@@ -62,3 +62,45 @@ func (s *AppService) DeleteApp(ctx *app.Context, uuid string) error {
 
 	return nil
 }
+
+// 查询app列表
+func (s *AppService) GetAppList(ctx *app.Context, params *model.ReqAppQueryParam) (r *model.PagedResponse, err error) {
+
+	var (
+		apps  []*model.App
+		total int64
+	)
+
+	query := ctx.DB.Model(&model.App{})
+
+	if params.Name != "" {
+		query = query.Where("name LIKE ?", "%"+params.Name+"%")
+	}
+
+	if params.ApiKey != "" {
+		query = query.Where("api_key LIKE ?", "%"+params.ApiKey+"%")
+	}
+
+	if params.Status != 0 {
+		query = query.Where("status = ?", params.Status)
+	}
+
+	err = query.Offset(params.GetOffset()).Limit(params.PageSize).Find(&apps).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get app list", err)
+		return nil, errors.New("failed to get app list")
+	}
+
+	err = query.Count(&total).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to count app list", err)
+		return nil, errors.New("failed to count app list")
+	}
+
+	return &model.PagedResponse{
+		Total:    total,
+		Data:     apps,
+		Current:  params.Current,
+		PageSize: params.PageSize,
+	}, nil
+}

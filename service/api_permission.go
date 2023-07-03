@@ -62,3 +62,15 @@ func (s *AppPermissionService) DeleteAppPermission(ctx *app.Context, uuid string
 
 	return nil
 }
+
+// 获取app的api权限列表
+func (s *AppPermissionService) GetAppAPIPermissions(ctx *app.Context, appUUID string) ([]*model.API, error) {
+	var apis []*model.API
+	err := ctx.DB.Table("apis").Joins("left join app_permissions on apis.uuid = app_permissions.api_uuid").Where("app_permissions.app_uuid = ?", appUUID).Find(&apis).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get app api permissions", err)
+		return nil, errors.New("failed to get app api permissions")
+	}
+
+	return apis, nil
+}

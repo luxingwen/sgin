@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"sgin/controller"
+	"sgin/model"
 	"sgin/pkg/app"
 	"sgin/pkg/config"
 	"sgin/routers"
@@ -36,6 +37,7 @@ import (
 func main() {
 	config.InitConfig()
 	serverApp := app.NewApp()
+	model.MigrateDbTable(serverApp.DB)
 	serverApp.Use(app.RecoveryWithWriter(serverApp.Logger))
 
 	routers.InitRouter(serverApp)
