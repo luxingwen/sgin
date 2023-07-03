@@ -73,3 +73,9 @@ type ReqUuidParam struct {
 	Uuid  string   `json:"uuid"`
 	Uuids []string `json:"uuids"`
 }
+
+// api权限参数
+type ReqApiPermissionParam struct {
+	AppId string `json:"app_id"`
+	Pagination
+}
