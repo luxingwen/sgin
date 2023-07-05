@@ -15,7 +15,6 @@ type RegisterController struct {
 	VerificationCodeService *service.VerificationCodeService
 }
 
-// @Tags Register
 // @Summary 注册
 // @Description 注册
 // @Tags 用户
