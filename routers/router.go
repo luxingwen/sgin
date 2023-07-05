@@ -16,6 +16,7 @@ func InitRouter(ctx *app.App) {
 	InitUserRouter(ctx)
 	InitMenuRouter(ctx)
 	InitAppRouter(ctx)
+	InitVerificationCodeRouter(ctx)
 }
 
 func InitUserRouter(ctx *app.App) {
@@ -70,6 +71,16 @@ func InitAppRouter(ctx *app.App) {
 		v1.POST("/app/update", appController.UpdateApp)
 		v1.POST("/app/delete", appController.DeleteApp)
 
+	}
+}
+
+func InitVerificationCodeRouter(ctx *app.App) {
+	v1 := ctx.Group("/api/v1")
+	{
+		verificationCodeController := &controller.VerificationCodeController{
+			VerificationCodeService: &service.VerificationCodeService{},
+		}
+		v1.POST("/verification_code/create", verificationCodeController.CreateVerificationCode)
 	}
 }
 

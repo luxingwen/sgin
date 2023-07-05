@@ -52,10 +52,11 @@ type TencenCloudConfig struct {
 
 // 邮件配置
 type MailConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host         string
+	Port         int
+	Username     string
+	Password     string
+	RegisterTile string // 注册邮件标题
 }
 
 type SmartGptConfig struct {

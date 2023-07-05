@@ -15,3 +15,10 @@ MySQL:
   Password: "root"
   Database: "sgin"
   ShowSQL: true
+
+MailConfig:
+  Host: "smtp.qiye.aliyun.com"
+  Port: 465
+  Username: "lewis@biggerforum.org"
+  Password: ""
+  RegisterTile: "AI云助手邮件验证码"

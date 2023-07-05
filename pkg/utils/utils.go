@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -65,4 +67,11 @@ func ParseTokenGetUserID(tokenString string) (string, error) {
 	}
 
 	return userID, nil
+}
+
+// 生成验证码
+func GenerateVerificationCode() string {
+	rand.Seed(time.Now().UnixNano())
+	code := rand.Intn(999999)
+	return strconv.Itoa(code)
 }

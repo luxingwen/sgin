@@ -79,3 +79,8 @@ type ReqApiPermissionParam struct {
 	AppId string `json:"app_id"`
 	Pagination
 }
+
+type ReqVerificationCodeParam struct {
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+}

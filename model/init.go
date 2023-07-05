@@ -15,5 +15,6 @@ func MigrateDbTable(db *gorm.DB) {
 		&UserRole{},
 		&Team{},
 		&TeamMember{},
+		&VerificationCode{},
 	)
 }
