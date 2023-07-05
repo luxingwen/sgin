@@ -17,6 +17,7 @@ type Config struct {
 	Upload          UploadConfig
 	PasswdKey       string // 密码加密key
 	MailConfig      MailConfig
+	RedisConfig     RedisConfig
 }
 
 type UploadConfig struct {
@@ -62,6 +63,12 @@ type MailConfig struct {
 type SmartGptConfig struct {
 	Address string
 	Key     string
+}
+
+type RedisConfig struct {
+	Address  string // 地址, 多个使用逗号(,)分隔
+	Password string
+	Database int
 }
 
 var (

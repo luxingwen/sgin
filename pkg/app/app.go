@@ -47,6 +47,10 @@ func NewApp() *App {
 		app.DB.Logger = gormLogger
 	}
 
+	if app.Config.RedisConfig.Address != "" {
+		app.Redis = redisop.NewRedisClient(app.Config.RedisConfig.Address, app.Config.RedisConfig.Password, app.Config.RedisConfig.Database)
+	}
+
 	app.Router = gin.Default()
 
 	return app
