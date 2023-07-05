@@ -33,6 +33,7 @@ func InitUserRouter(ctx *app.App) {
 		v1.POST("/user/list", userController.GetUserList)
 		v1.POST("/user/update", userController.UpdateUser)
 		v1.POST("/user/delete", userController.DeleteUser)
+		v1.GET("/user/myinfo", userController.GetMyInfo)
 
 	}
 

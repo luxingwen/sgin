@@ -131,3 +131,20 @@ func (uc *UserController) GetUserList(c *app.Context) {
 
 	c.JSONSuccess(users)
 }
+
+// 获取自己的信息
+// @Summary 获取自己的信息
+// @Tags 用户
+// @Accept json
+// @Produce json
+// @Success 200 {object} string
+// @Router /user/myinfo [get]
+func (uc *UserController) GetMyInfo(c *app.Context) {
+	userId := c.GetString("user_id")
+	user, err := uc.Service.GetUserByUUID(c, userId)
+	if err != nil {
+		c.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSONSuccess(user)
+}
