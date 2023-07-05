@@ -83,4 +83,13 @@ type ReqApiPermissionParam struct {
 type ReqVerificationCodeParam struct {
 	Email string `json:"email"`
 	Phone string `json:"phone"`
+	Code  string `json:"code"`
+}
+
+type ReqRegisterParam struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	Code     string `json:"code"`
 }

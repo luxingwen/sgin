@@ -75,3 +75,43 @@ func (v *VerificationCodeController) CreateVerificationCode(ctx *app.Context) {
 
 	ctx.JSONSuccess("验证码发送成功")
 }
+
+// CheckVerificationCode 检查验证码
+// @Summary 检查验证码
+// @Description 检查验证码
+// @Tags 验证码
+// @Accept json
+// @Produce json
+// @Param params body string true "验证码信息"
+// @Success 200 {object} string "Successfully fetched user data"
+// @Router /verification_code/check [post]
+func (v *VerificationCodeController) CheckVerificationCode(ctx *app.Context) {
+	param := &model.ReqVerificationCodeParam{}
+	if err := ctx.ShouldBindJSON(param); err != nil {
+		ctx.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if param.Email == "" && param.Phone == "" {
+		ctx.JSONError(http.StatusBadRequest, "邮箱和手机号码不能同时为空")
+		return
+	}
+
+	if param.Code == "" {
+		ctx.JSONError(http.StatusBadRequest, "验证码不能为空")
+		return
+	}
+
+	ok, err := v.VerificationCodeService.CheckVerificationCode(ctx, param.Code, param.Email, param.Phone)
+	if err != nil {
+		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if ok == false {
+		ctx.JSONError(http.StatusBadRequest, "验证码错误")
+		return
+	}
+
+	ctx.JSONSuccess("验证码正确")
+}

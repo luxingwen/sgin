@@ -18,7 +18,7 @@ func (v *VerificationCodeService) CreateVerificationCode(ctx *app.Context, email
 
 	// 先获取最新的一条验证码是否过期
 	var vcode model.VerificationCode
-	err := ctx.DB.Where("email = ? AND phone = ?", email, phone).Order("created_at desc").First(&vcode).Error
+	err := ctx.DB.Where("email = ? OR phone = ?", email, phone).Order("created_at desc").First(&vcode).Error
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func (v *VerificationCodeService) CreateVerificationCode(ctx *app.Context, email
 func (v *VerificationCodeService) CheckVerificationCode(ctx *app.Context, code string, email string, phone string) (bool, error) {
 
 	var vcode model.VerificationCode
-	err := ctx.DB.Where("code = ? AND email = ? AND phone = ?", code, email, phone).First(&vcode).Error
+	err := ctx.DB.Where("code = ? AND (email = ? OR phone = ?)", code, email, phone).First(&vcode).Error
 	if err != nil {
 		return false, err
 	}

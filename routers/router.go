@@ -17,6 +17,8 @@ func InitRouter(ctx *app.App) {
 	InitMenuRouter(ctx)
 	InitAppRouter(ctx)
 	InitVerificationCodeRouter(ctx)
+	InitRegisterRouter(ctx)
+	InitLoginRouter(ctx)
 }
 
 func InitUserRouter(ctx *app.App) {
@@ -81,6 +83,28 @@ func InitVerificationCodeRouter(ctx *app.App) {
 			VerificationCodeService: &service.VerificationCodeService{},
 		}
 		v1.POST("/verification_code/create", verificationCodeController.CreateVerificationCode)
+	}
+}
+
+// 注册的路由
+func InitRegisterRouter(ctx *app.App) {
+	v1 := ctx.Group("/api/v1")
+	{
+		registerController := &controller.RegisterController{
+			UserService:             &service.UserService{},
+			VerificationCodeService: &service.VerificationCodeService{},
+		}
+		v1.POST("/register", registerController.Register)
+	}
+}
+
+func InitLoginRouter(ctx *app.App) {
+	v1 := ctx.Group("/api/v1")
+	{
+		loginController := &controller.LoginController{
+			UserService: &service.UserService{},
+		}
+		v1.POST("/login", loginController.Login)
 	}
 }
 
