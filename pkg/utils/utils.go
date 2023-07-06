@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"math/rand"
 	"strconv"
 	"time"
@@ -74,4 +77,11 @@ func GenerateVerificationCode() string {
 	rand.Seed(time.Now().UnixNano())
 	code := rand.Intn(999999)
 	return strconv.Itoa(code)
+}
+
+// SignBody 签名
+func SignBody(body, secretKey []byte) string {
+	mac := hmac.New(sha256.New, secretKey)
+	mac.Write(body)
+	return hex.EncodeToString(mac.Sum(nil))
 }
