@@ -21,6 +21,7 @@ type Config struct {
 	NoRouterFoward  string            // 是否转发没有路由的请求
 	ForwardPrefix   []string          // 转发前缀
 	ForwardAddress  string            // 转发地址
+	ApiPrefix       string            // api前缀
 }
 
 type UploadConfig struct {

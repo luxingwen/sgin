@@ -24,3 +24,4 @@ MailConfig:
   RegisterTile: "AI云助手邮件验证码"
 
 NoRouterFoward: "https://www.baidu.com"
+ApiPrefix: "/api"

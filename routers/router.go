@@ -22,7 +22,7 @@ func InitRouter(ctx *app.App) {
 }
 
 func InitUserRouter(ctx *app.App) {
-	v1 := ctx.Group("/api/v1")
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	{
 		userController := &controller.UserController{
 			Service: &service.UserService{},
@@ -51,7 +51,7 @@ func InitUserRouter(ctx *app.App) {
 }
 
 func InitMenuRouter(ctx *app.App) {
-	v1 := ctx.Group("/api/v1")
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	{
 		menuController := &controller.MenuController{
 			MenuService: &service.MenuService{},
@@ -64,7 +64,7 @@ func InitMenuRouter(ctx *app.App) {
 }
 
 func InitAppRouter(ctx *app.App) {
-	v1 := ctx.Group("/api/v1")
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	{
 		appController := &controller.AppController{
 			AppService: &service.AppService{},
@@ -78,7 +78,7 @@ func InitAppRouter(ctx *app.App) {
 }
 
 func InitVerificationCodeRouter(ctx *app.App) {
-	v1 := ctx.Group("/api/v1")
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	{
 		verificationCodeController := &controller.VerificationCodeController{
 			VerificationCodeService: &service.VerificationCodeService{},
@@ -89,7 +89,7 @@ func InitVerificationCodeRouter(ctx *app.App) {
 
 // 注册的路由
 func InitRegisterRouter(ctx *app.App) {
-	v1 := ctx.Group("/api/v1")
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	{
 		registerController := &controller.RegisterController{
 			UserService:             &service.UserService{},
@@ -100,7 +100,7 @@ func InitRegisterRouter(ctx *app.App) {
 }
 
 func InitLoginRouter(ctx *app.App) {
-	v1 := ctx.Group("/api/v1")
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	{
 		loginController := &controller.LoginController{
 			UserService: &service.UserService{},
