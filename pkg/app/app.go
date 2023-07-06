@@ -89,6 +89,10 @@ func (app *App) PATCH(relativePath string, hf HandlerFunc) {
 	app.Router.PATCH(relativePath, app.Wrap(hf))
 }
 
+func (app *App) NoRoute(hf HandlerFunc) {
+	app.Router.NoRoute(app.Wrap(hf))
+}
+
 func (rg *AppRouterGroup) GET(relativePath string, hf HandlerFunc) {
 	rg.RouterGroup.GET(relativePath, rg.App.Wrap(hf))
 }

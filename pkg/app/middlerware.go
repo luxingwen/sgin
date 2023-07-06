@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -86,6 +88,89 @@ func Cors() HandlerFunc {
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
+		}
+
+		c.Next()
+	}
+}
+
+// 处理norouter
+func NoRouterHandler(use ...HandlerFunc) HandlerFunc {
+	return func(c *Context) {
+
+		if c.Config.NoRouterFoward == "" {
+			c.JSONError(http.StatusNotFound, "404 Not Found")
+			return
+		}
+
+		for _, handler := range use {
+			handler(c)
+			if c.IsAborted() {
+				return
+			}
+		}
+
+		remote, err := url.Parse(c.Config.NoRouterFoward) //将此替换为你的目标URL
+		if err != nil {
+			c.Logger.Error(err)
+			c.JSONError(http.StatusInternalServerError, "500 Internal Server Error")
+			return
+		}
+
+		proxy := httputil.NewSingleHostReverseProxy(remote)
+		// 定义我们自己的director
+		proxy.Director = func(req *http.Request) {
+			req.Header = c.Request.Header
+			req.Host = remote.Host
+			req.URL.Scheme = remote.Scheme
+			req.URL.Host = remote.Host
+		}
+
+		proxy.ServeHTTP(c.Writer, c.Request)
+
+	}
+}
+
+func TestAbort() HandlerFunc {
+	return func(c *Context) {
+		c.AbortWithStatusJSON(http.StatusOK, "test abort")
+	}
+}
+
+// 根据前缀进行转发
+func ForwardByPrefix(use ...HandlerFunc) HandlerFunc {
+	return func(c *Context) {
+
+		upath := c.Request.URL.Path
+		for _, prefix := range c.Config.ForwardPrefix {
+			if len(upath) >= len(prefix) && upath[:len(prefix)] == prefix {
+
+				for _, handler := range use {
+					handler(c)
+					if c.IsAborted() {
+						return
+					}
+				}
+				// 转发
+				remote, err := url.Parse(c.Config.ForwardAddress) //将此替换为你的目标URL
+				if err != nil {
+					c.Logger.Error(err)
+					c.JSONError(http.StatusInternalServerError, "500 Internal Server Error")
+					return
+				}
+
+				proxy := httputil.NewSingleHostReverseProxy(remote)
+				// 定义我们自己的director
+				proxy.Director = func(req *http.Request) {
+					req.Header = c.Request.Header
+					req.Host = remote.Host
+					req.URL.Scheme = remote.Scheme
+					req.URL.Host = remote.Host
+				}
+
+				proxy.ServeHTTP(c.Writer, c.Request)
+				return
+			}
 		}
 
 		c.Next()

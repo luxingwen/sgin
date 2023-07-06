@@ -22,3 +22,5 @@ MailConfig:
   Username: "lewis@biggerforum.org"
   Password: ""
   RegisterTile: "AI云助手邮件验证码"
+
+NoRouterFoward: "https://www.baidu.com"

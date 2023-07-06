@@ -8,16 +8,19 @@ import (
 )
 
 type Config struct {
-	ServerPort      string
-	LogConfig       LogConfig
-	MySQL           MySQLConfig
-	TencentCloud    TencenCloudConfig
-	PkgFileDir      string
-	UserInfoAddress string
-	Upload          UploadConfig
-	PasswdKey       string // 密码加密key
-	MailConfig      MailConfig
-	RedisConfig     RedisConfig
+	ServerPort      string            // 服务端口
+	LogConfig       LogConfig         // 日志配置
+	MySQL           MySQLConfig       // mysql配置
+	TencentCloud    TencenCloudConfig // 腾讯云配置
+	PkgFileDir      string            // 包文件存放目录
+	UserInfoAddress string            // 用户信息地址
+	Upload          UploadConfig      // 上传配置
+	PasswdKey       string            // 密码加密key
+	MailConfig      MailConfig        // 邮件配置
+	RedisConfig     RedisConfig       // redis配置
+	NoRouterFoward  string            // 是否转发没有路由的请求
+	ForwardPrefix   []string          // 转发前缀
+	ForwardAddress  string            // 转发地址
 }
 
 type UploadConfig struct {
@@ -25,23 +28,23 @@ type UploadConfig struct {
 }
 
 type LogConfig struct {
-	Level        string
-	Format       string
-	MaxSize      int  // 最大文件大小（MB）
-	MaxAge       int  // 最大文件保留天数
-	Compress     bool // 是否压缩
-	Filename     string
-	ResponseSize int  // 字节
-	ShowConsole  bool // 是否显示在控制台
+	Level        string // 日志级别
+	Format       string // 日志格式
+	MaxSize      int    // 最大文件大小（MB）
+	MaxAge       int    // 最大文件保留天数
+	Compress     bool   // 是否压缩
+	Filename     string // 日志文件名
+	ResponseSize int    // 字节
+	ShowConsole  bool   // 是否显示在控制台
 }
 
 type MySQLConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Database string
-	ShowSQL  bool
+	Host     string // 数据库地址
+	Port     int    // 数据库端口
+	Username string // 数据库用户名
+	Password string // 数据库密码
+	Database string // 数据库名
+	ShowSQL  bool   // 是否显示SQL
 }
 
 type TencenCloudConfig struct {
@@ -53,10 +56,10 @@ type TencenCloudConfig struct {
 
 // 邮件配置
 type MailConfig struct {
-	Host         string
-	Port         int
-	Username     string
-	Password     string
+	Host         string // 邮件服务器地址
+	Port         int    // 邮件服务器端口
+	Username     string // 邮件服务器用户名
+	Password     string // 邮件服务器密码
 	RegisterTile string // 注册邮件标题
 }
 

@@ -47,6 +47,8 @@ func main() {
 		ctx.JSONSuccess("pong")
 	})
 
+	serverApp.NoRoute(app.NoRouterHandler(app.TestAbort()))
+
 	v1 := serverApp.Group("/api/v1")
 	userController := &controller.UserController{Service: &service.UserService{}}
 	{
