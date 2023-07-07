@@ -15,6 +15,6 @@ type User struct {
 	Age       int       `gorm:"type:int" json:"age"`                      // 年龄
 	Sex       string    `gorm:"type:varchar(10)" json:"sex"`              // 性别 0:未知 1:男 2:女
 	Signed    string    `gorm:"type:varchar(255)" json:"signed"`          // 个性签名
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`         // 创建时间
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`         // 更新时间
 }

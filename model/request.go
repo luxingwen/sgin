@@ -26,13 +26,13 @@ type ReqUserLogin struct {
 }
 
 type ReqUserQueryParam struct {
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Nickname string `json:"nickname"`
-	Sex      int    `json:"sex"`
-	Username string `json:"username"`
-	Status   int    `json:"status"`
-	Uuid     string `json:"uuid"`
+	Email    string `json:"email"`    // 邮箱
+	Phone    string `json:"phone"`    // 手机号
+	Nickname string `json:"nickname"` // 昵称
+	Sex      int    `json:"sex"`      // 性别
+	Username string `json:"username"` // 用户名
+	Status   int    `json:"status"`   // 状态
+	Uuid     string `json:"uuid"`     // uuid
 	Pagination
 }
 
@@ -62,9 +62,9 @@ type ReqApiQueryParam struct {
 
 // 查询app的参数
 type ReqAppQueryParam struct {
-	Name   string `json:"name"`
-	ApiKey string `json:"api_key"`
-	Status int    `json:"status"`
+	Name   string `json:"name"`    // 名称
+	ApiKey string `json:"api_key"` // api_key
+	Status int    `json:"status"`  // 状态
 	Pagination
 }
 
