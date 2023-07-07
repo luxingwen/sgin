@@ -10,3 +10,75 @@ type PagedResponse struct {
 type ResUserLogin struct {
 	Token string `json:"token"`
 }
+
+type BaseResponse struct {
+	TraceID string `json:"trace_id"` // 请求唯一标识
+	Code    int    `json:"code"`     // 状态码
+	Message string `json:"message"`  // 提示信息
+}
+
+type UserInfoResponse struct {
+	BaseResponse
+	Data User `json:"data"`
+}
+
+type BasePageResponse struct {
+	Current  int   `json:"current"`
+	PageSize int   `json:"pageSize"`
+	Total    int64 `json:"total"`
+}
+
+type UserPageResponse struct {
+	BasePageResponse
+	Data []User `json:"data"`
+}
+
+type UserQueryResponse struct {
+	BaseResponse
+	Data UserPageResponse `json:"data"`
+}
+
+type AppInfoResponse struct {
+	BaseResponse
+	Data App `json:"data"`
+}
+
+type AppPageResponse struct {
+	BasePageResponse
+	Data []App `json:"data"`
+}
+
+type AppQueryResponse struct {
+	BaseResponse
+	Data AppPageResponse `json:"data"`
+}
+
+type MenuInfoResponse struct {
+	BaseResponse
+	Data Menu `json:"data"`
+}
+
+type MenuPageResponse struct {
+	BasePageResponse
+	Data []Menu `json:"data"`
+}
+
+type MenuQueryResponse struct {
+	BaseResponse
+	Data MenuPageResponse `json:"data"`
+}
+
+type RoleInfoResponse struct {
+	BaseResponse
+	Data Role `json:"data"`
+}
+
+type RolePageResponse struct {
+	BasePageResponse
+	Data []Role `json:"data"`
+}
+
+type RoleQueryResponse struct {
+	BaseResponse
+	Data RolePageResponse `json:"data"`
+}

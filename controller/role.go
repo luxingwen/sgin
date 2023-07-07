@@ -18,7 +18,7 @@ type RoleController struct {
 // @Produce json
 // @Param Authorization header string true "token"
 // @Param params body model.ReqRoleQueryParam false "查询参数"
-// @Success 200 {object} model.PagedResponse
+// @Success 200 {object} model.RoleQueryResponse
 // @Router /role/list [post]
 func (c *RoleController) GetRoleList(ctx *app.Context) {
 	param := &model.ReqRoleQueryParam{}
@@ -43,7 +43,7 @@ func (c *RoleController) GetRoleList(ctx *app.Context) {
 // @Produce json
 // @Param Authorization header string true "token"
 // @Param params body model.Role true "角色信息"
-// @Success 200 {object} model.Role
+// @Success 200 {object} model.RoleInfoResponse
 // @Router /role/create [post]
 func (c *RoleController) CreateRole(ctx *app.Context) {
 	param := &model.Role{}

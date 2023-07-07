@@ -19,7 +19,7 @@ type UserController struct {
 // @Accept  json
 // @Produce  json
 // @Param user body model.User true "Create user"
-// @Success 200 {object} model.User "Successfully created user"
+// @Success 200 {object} model.UserInfoResponse
 // @Router /user/create [post]
 func (uc *UserController) CreateUser(c *app.Context) {
 	var user model.User
@@ -43,7 +43,7 @@ func (uc *UserController) CreateUser(c *app.Context) {
 // @Accept  json
 // @Produce  json
 // @Param params body model.ReqUserQueryParam false "查询参数"
-// @Success 200 {object} model.User "Successfully fetched user data"
+// @Success 200 {object} model.UserInfoResponse
 // @Router /user/info [post]
 func (uc *UserController) GetUserByUUID(c *app.Context) {
 	param := &model.ReqUserQueryParam{}
@@ -67,7 +67,7 @@ func (uc *UserController) GetUserByUUID(c *app.Context) {
 // @Accept  json
 // @Produce  json
 // @Param user body model.User true "Update user"
-// @Success 200 {object} model.User "Successfully updated user"
+// @Success 200 {object} model.UserInfoResponse
 // @Router /user/update [post]
 func (uc *UserController) UpdateUser(c *app.Context) {
 	var user model.User
@@ -91,7 +91,7 @@ func (uc *UserController) UpdateUser(c *app.Context) {
 // @Accept  json
 // @Produce  json
 // @Param params body model.ReqUserDeleteParam true "Delete user"
-// @Success 200 {string} string "Successfully deleted user"
+// @Success 200 {object} app.Response
 // @Router /user/delete [post]
 func (uc *UserController) DeleteUser(c *app.Context) {
 	params := &model.ReqUserDeleteParam{}
@@ -114,7 +114,7 @@ func (uc *UserController) DeleteUser(c *app.Context) {
 // @Accept json
 // @Produce json
 // @Param params body model.ReqUserQueryParam true "获取用户列表参数"
-// @Success 200 {object} model.PagedResponse
+// @Success 200 {object} model.UserQueryResponse
 // @Router /user/list [post]
 func (uc *UserController) GetUserList(c *app.Context) {
 	param := &model.ReqUserQueryParam{}
@@ -137,7 +137,7 @@ func (uc *UserController) GetUserList(c *app.Context) {
 // @Tags 用户
 // @Accept json
 // @Produce json
-// @Success 200 {object} string
+// @Success 200 {object} model.UserInfoResponse
 // @Router /user/myinfo [get]
 func (uc *UserController) GetMyInfo(c *app.Context) {
 	userId := c.GetString("user_id")

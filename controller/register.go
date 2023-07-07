@@ -21,7 +21,7 @@ type RegisterController struct {
 // @Accept  json
 // @Produce  json
 // @Param params body model.ReqRegisterParam true "Register"
-// @Success 200 {object} string "Successfully fetched user data"
+// @Success 200 {object} model.UserInfoResponse
 // @Router /register [post]
 func (rc *RegisterController) Register(c *app.Context) {
 

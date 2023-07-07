@@ -18,7 +18,7 @@ type MenuController struct {
 // @Produce json
 // @Param Authorization header string true "token"
 // @Param params body model.ReqMenuQueryParam false "查询参数"
-// @Success 200 {object} model.PagedResponse
+// @Success 200 {object} model.MenuQueryResponse
 // @Router /menu/list [post]
 func (c *MenuController) GetMenuList(ctx *app.Context) {
 	param := &model.ReqMenuQueryParam{}
@@ -43,7 +43,7 @@ func (c *MenuController) GetMenuList(ctx *app.Context) {
 // @Produce json
 // @Param Authorization header string true "token"
 // @Param params body model.Menu true "菜单信息"
-// @Success 200 {object} model.Menu
+// @Success 200 {object} model.MenuPageResponse
 // @Router /menu/create [post]
 func (c *MenuController) CreateMenu(ctx *app.Context) {
 	param := &model.Menu{}
@@ -68,7 +68,7 @@ func (c *MenuController) CreateMenu(ctx *app.Context) {
 // @Produce json
 // @Param Authorization header string true "token"
 // @Param params body model.Menu true "菜单信息"
-// @Success 200 {object} model.Menu
+// @Success 200 {object} model.MenuPageResponse
 // @Router /menu/update [post]
 func (c *MenuController) UpdateMenu(ctx *app.Context) {
 	param := &model.Menu{}
@@ -93,7 +93,7 @@ func (c *MenuController) UpdateMenu(ctx *app.Context) {
 // @Produce json
 // @Param Authorization header string true "token"
 // @Param params body model.ReqMenuDeleteParam true "删除参数"
-// @Success 200 {string} app.Response
+// @Success 200 {object} app.Response
 // @Router /menu/delete [post]
 func (c *MenuController) DeleteMenu(ctx *app.Context) {
 	param := &model.ReqMenuDeleteParam{}

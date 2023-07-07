@@ -17,7 +17,7 @@ type AppController struct {
 // @Accept  json
 // @Produce  json
 // @Param params body model.ReqAppQueryParam false "查询参数"
-// @Success 200 {object} string "Successfully fetched user data"
+// @Success 200 {object} model.AppQueryResponse
 // @Router /app/list [post]
 func (ac *AppController) GetAppList(c *app.Context) {
 	param := &model.ReqAppQueryParam{}
@@ -40,7 +40,7 @@ func (ac *AppController) GetAppList(c *app.Context) {
 // @Accept  json
 // @Produce  json
 // @Param params body model.App true "Create app"
-// @Success 200 {object} string "Successfully fetched user data"
+// @Success 200 {object} model.AppInfoResponse
 // @Router /app/create [post]
 func (ac *AppController) CreateApp(c *app.Context) {
 	var app model.App
@@ -63,7 +63,7 @@ func (ac *AppController) CreateApp(c *app.Context) {
 // @Accept  json
 // @Produce  json
 // @Param params body model.App true "Update app"
-// @Success 200 {object} string "Successfully update user data"
+// @Success 200 {object} model.AppInfoResponse
 // @Router /app/update [post]
 func (ac *AppController) UpdateApp(c *app.Context) {
 	var app model.App
@@ -86,7 +86,7 @@ func (ac *AppController) UpdateApp(c *app.Context) {
 // @Accept  json
 // @Produce  json
 // @Param params body model.ReqUuidParam true "Delete app"
-// @Success 200 {object} string "Successfully delete user data"
+// @Success 200 {object} app.Response "Successfully delete user data"
 // @Router /app/delete [post]
 func (ac *AppController) DeleteApp(c *app.Context) {
 	var app model.ReqUuidParam
