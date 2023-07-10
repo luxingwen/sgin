@@ -19,6 +19,7 @@ func InitRouter(ctx *app.App) {
 	InitVerificationCodeRouter(ctx)
 	InitRegisterRouter(ctx)
 	InitLoginRouter(ctx)
+	InitServerRouter(ctx)
 }
 
 func InitUserRouter(ctx *app.App) {
@@ -106,6 +107,21 @@ func InitLoginRouter(ctx *app.App) {
 			UserService: &service.UserService{},
 		}
 		v1.POST("/login", loginController.Login)
+	}
+}
+
+// 服务的路由
+func InitServerRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	{
+		serverController := &controller.ServerController{
+			ServerService: &service.ServerService{},
+		}
+		v1.POST("/server/create", serverController.CreateServer)
+		v1.POST("/server/update", serverController.UpdateServer)
+		v1.POST("/server/delete", serverController.DeleteServer)
+		v1.POST("/server/info", serverController.GetServerInfo)
+		v1.POST("/server/list", serverController.GetServerList)
 	}
 }
 

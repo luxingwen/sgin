@@ -93,3 +93,9 @@ type ReqRegisterParam struct {
 	Password string `json:"password"`
 	Code     string `json:"code"`
 }
+
+// 服务查询参数
+type ReqServerQueryParam struct {
+	Name string `json:"name"`
+	Pagination
+}
