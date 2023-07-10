@@ -97,3 +97,23 @@ type ServerQueryResponse struct {
 	BaseResponse
 	Data ServerPageResponse `json:"data"`
 }
+
+type TeamInfoResponse struct {
+	BaseResponse
+	Data Team `json:"data"`
+}
+
+type TeamPageResponse struct {
+	BasePageResponse
+	Data []Team `json:"data"`
+}
+
+type TeamQueryResponse struct {
+	BaseResponse
+	Data TeamPageResponse `json:"data"`
+}
+
+type TeamMemberInfoResponse struct {
+	BaseResponse
+	Data TeamMember `json:"data"`
+}

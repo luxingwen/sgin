@@ -20,6 +20,7 @@ func InitRouter(ctx *app.App) {
 	InitRegisterRouter(ctx)
 	InitLoginRouter(ctx)
 	InitServerRouter(ctx)
+	InitTeamRouter(ctx)
 }
 
 func InitUserRouter(ctx *app.App) {
@@ -122,6 +123,21 @@ func InitServerRouter(ctx *app.App) {
 		v1.POST("/server/delete", serverController.DeleteServer)
 		v1.POST("/server/info", serverController.GetServerInfo)
 		v1.POST("/server/list", serverController.GetServerList)
+	}
+}
+
+// 团队的路由
+func InitTeamRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	{
+		teamController := &controller.TeamController{
+			TeamService: &service.TeamService{},
+		}
+		v1.POST("/team/create", teamController.CreateTeam)
+		v1.POST("/team/update", teamController.UpdateTeam)
+		v1.POST("/team/delete", teamController.DeleteTeam)
+		v1.POST("/team/info", teamController.GetTeamInfo)
+		v1.POST("/team/list", teamController.GetTeamList)
 	}
 }
 
