@@ -36,6 +36,22 @@ func NewRedisClient(addr, password string, db int) *RedisClient {
 	return client
 }
 
+// hash set
+func (c *RedisClient) HSet(ctx context.Context, key, field string, value interface{}) error {
+	if c.isCluster {
+		return c.clusterClient.HSet(ctx, key, field, value).Err()
+	}
+	return c.standaloneClient.HSet(ctx, key, field, value).Err()
+}
+
+// hash get
+func (c *RedisClient) HGet(ctx context.Context, key, field string) (string, error) {
+	if c.isCluster {
+		return c.clusterClient.HGet(ctx, key, field).Result()
+	}
+	return c.standaloneClient.HGet(ctx, key, field).Result()
+}
+
 func (c *RedisClient) Set(ctx context.Context, key, value string, expiration time.Duration) error {
 	if c.isCluster {
 		return c.clusterClient.Set(ctx, key, value, expiration).Err()
