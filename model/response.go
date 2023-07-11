@@ -82,3 +82,38 @@ type RoleQueryResponse struct {
 	BaseResponse
 	Data RolePageResponse `json:"data"`
 }
+
+type ServerInfoResponse struct {
+	BaseResponse
+	Data Server `json:"data"`
+}
+
+type ServerPageResponse struct {
+	BasePageResponse
+	Data []Server `json:"data"`
+}
+
+type ServerQueryResponse struct {
+	BaseResponse
+	Data ServerPageResponse `json:"data"`
+}
+
+type TeamInfoResponse struct {
+	BaseResponse
+	Data Team `json:"data"`
+}
+
+type TeamPageResponse struct {
+	BasePageResponse
+	Data []Team `json:"data"`
+}
+
+type TeamQueryResponse struct {
+	BaseResponse
+	Data TeamPageResponse `json:"data"`
+}
+
+type TeamMemberInfoResponse struct {
+	BaseResponse
+	Data TeamMember `json:"data"`
+}

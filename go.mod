@@ -3,7 +3,6 @@ module sgin
 go 1.20
 
 require (
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/casbin/casbin/v2 v2.71.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
@@ -14,6 +13,7 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/swaggo/swag v1.16.1
 	go.uber.org/zap v1.24.0
+	golang.org/x/time v0.1.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.1

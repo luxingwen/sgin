@@ -93,3 +93,27 @@ type ReqRegisterParam struct {
 	Password string `json:"password"`
 	Code     string `json:"code"`
 }
+
+// 服务查询参数
+type ReqServerQueryParam struct {
+	Name string `json:"name"`
+	Pagination
+}
+
+// 团队查询参数
+type ReqTeamQueryParam struct {
+	Name string `json:"name"`
+	Pagination
+}
+
+// 创建团队成员参数
+type ReqTeamMemberCreateParam struct {
+	TeamUUID string `json:"team_uuid"`
+	UserUUID string `json:"user_uuid"`
+}
+
+// 团队成员查询参数
+type ReqTeamMemberQueryParam struct {
+	TeamUUID string `json:"team_uuid"`
+	Pagination
+}

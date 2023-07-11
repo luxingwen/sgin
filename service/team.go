@@ -7,6 +7,7 @@ import (
 	"sgin/model"
 	"sgin/pkg/app"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -18,6 +19,7 @@ func NewTeamService() *TeamService {
 }
 
 func (s *TeamService) CreateTeam(ctx *app.Context, team *model.Team) error {
+	team.UUID = uuid.New().String()
 	team.CreatedAt = time.Now()
 	team.UpdatedAt = team.CreatedAt
 
@@ -61,4 +63,34 @@ func (s *TeamService) DeleteTeam(ctx *app.Context, uuid string) error {
 	}
 
 	return nil
+}
+
+// 获取团队列表
+func (s *TeamService) GetTeamList(ctx *app.Context, param *model.ReqTeamQueryParam) (r *model.PagedResponse, err error) {
+	var (
+		teamList []*model.Team
+		total    int64
+	)
+
+	db := ctx.DB.Model(&model.Team{})
+
+	if param.Name != "" {
+		db = db.Where("name like ?", "%"+param.Name+"%")
+	}
+
+	if err = db.Offset(param.GetOffset()).Limit(param.PageSize).Find(&teamList).Error; err != nil {
+		return
+	}
+	if err = db.Count(&total).Error; err != nil {
+		return
+	}
+
+	r = &model.PagedResponse{
+		Total:    total,
+		Current:  param.Current,
+		PageSize: param.PageSize,
+		Data:     teamList,
+	}
+
+	return
 }
