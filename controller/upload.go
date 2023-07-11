@@ -16,7 +16,7 @@ type UploadController struct {
 // @Param Authorization header string true "token"
 // @Param file formData file true "文件"
 // @Success 200 {string} app.Response "{"code":200,"data":{},"msg":"ok"}"
-// @Router /upload [post]
+// @Router /api/v1/upload [post]
 func (u *UploadController) UploadFile(ctx *app.Context) {
 	// Multipart form
 	form, err := ctx.MultipartForm()

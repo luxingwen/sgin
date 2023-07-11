@@ -19,7 +19,7 @@ type LoginController struct {
 // @Produce json
 // @Param params body model.ReqUserLogin true "登录参数"
 // @Success 200 {object} model.ResUserLogin
-// @Router /login [post]
+// @Router /api/v1/login [post]
 func (c *LoginController) Login(ctx *app.Context) {
 	param := &model.ReqUserLogin{}
 	if err := ctx.ShouldBindJSON(param); err != nil {

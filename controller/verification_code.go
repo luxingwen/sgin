@@ -32,7 +32,7 @@ var registerMailContent = `
 // @Produce json
 // @Param params body model.ReqVerificationCodeParam true "验证码信息"
 // @Success 200 {string} string "Successfully fetched user data"
-// @Router /verification_code/create [post]
+// @Router /api/v1/verification_code/create [post]
 func (v *VerificationCodeController) CreateVerificationCode(ctx *app.Context) {
 	param := &model.ReqVerificationCodeParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -84,7 +84,7 @@ func (v *VerificationCodeController) CreateVerificationCode(ctx *app.Context) {
 // @Produce json
 // @Param params body string true "验证码信息"
 // @Success 200 {string} string "Successfully fetched user data"
-// @Router /verification_code/check [post]
+// @Router /api/v1/verification_code/check [post]
 func (v *VerificationCodeController) CheckVerificationCode(ctx *app.Context) {
 	param := &model.ReqVerificationCodeParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {

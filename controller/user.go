@@ -20,7 +20,7 @@ type UserController struct {
 // @Produce  json
 // @Param user body model.User true "Create user"
 // @Success 200 {object} model.UserInfoResponse
-// @Router /user/create [post]
+// @Router /api/v1/user/create [post]
 func (uc *UserController) CreateUser(c *app.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -44,7 +44,7 @@ func (uc *UserController) CreateUser(c *app.Context) {
 // @Produce  json
 // @Param params body model.ReqUserQueryParam false "查询参数"
 // @Success 200 {object} model.UserInfoResponse
-// @Router /user/info [post]
+// @Router /api/v1/user/info [post]
 func (uc *UserController) GetUserByUUID(c *app.Context) {
 	param := &model.ReqUserQueryParam{}
 	if err := c.ShouldBindJSON(param); err != nil {
@@ -68,7 +68,7 @@ func (uc *UserController) GetUserByUUID(c *app.Context) {
 // @Produce  json
 // @Param user body model.User true "Update user"
 // @Success 200 {object} model.UserInfoResponse
-// @Router /user/update [post]
+// @Router /api/v1/user/update [post]
 func (uc *UserController) UpdateUser(c *app.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -92,7 +92,7 @@ func (uc *UserController) UpdateUser(c *app.Context) {
 // @Produce  json
 // @Param params body model.ReqUserDeleteParam true "Delete user"
 // @Success 200 {object} app.Response
-// @Router /user/delete [post]
+// @Router /api/v1/user/delete [post]
 func (uc *UserController) DeleteUser(c *app.Context) {
 	params := &model.ReqUserDeleteParam{}
 	if err := c.ShouldBindJSON(params); err != nil {
@@ -115,7 +115,7 @@ func (uc *UserController) DeleteUser(c *app.Context) {
 // @Produce json
 // @Param params body model.ReqUserQueryParam true "获取用户列表参数"
 // @Success 200 {object} model.UserQueryResponse
-// @Router /user/list [post]
+// @Router /api/v1/user/list [post]
 func (uc *UserController) GetUserList(c *app.Context) {
 	param := &model.ReqUserQueryParam{}
 	if err := c.ShouldBindJSON(param); err != nil {
@@ -138,7 +138,7 @@ func (uc *UserController) GetUserList(c *app.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} model.UserInfoResponse
-// @Router /user/myinfo [get]
+// @Router /api/v1/user/myinfo [get]
 func (uc *UserController) GetMyInfo(c *app.Context) {
 	userId := c.GetString("user_id")
 	user, err := uc.Service.GetUserByUUID(c, userId)

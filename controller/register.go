@@ -22,7 +22,7 @@ type RegisterController struct {
 // @Produce  json
 // @Param params body model.ReqRegisterParam true "Register"
 // @Success 200 {object} model.UserInfoResponse
-// @Router /register [post]
+// @Router /api/v1/register [post]
 func (rc *RegisterController) Register(c *app.Context) {
 
 	params := &model.ReqRegisterParam{}

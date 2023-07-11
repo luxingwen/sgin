@@ -19,7 +19,7 @@ type MenuController struct {
 // @Param Authorization header string true "token"
 // @Param params body model.ReqMenuQueryParam false "查询参数"
 // @Success 200 {object} model.MenuQueryResponse
-// @Router /menu/list [post]
+// @Router /api/v1/menu/list [post]
 func (c *MenuController) GetMenuList(ctx *app.Context) {
 	param := &model.ReqMenuQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -44,7 +44,7 @@ func (c *MenuController) GetMenuList(ctx *app.Context) {
 // @Param Authorization header string true "token"
 // @Param params body model.Menu true "菜单信息"
 // @Success 200 {object} model.MenuPageResponse
-// @Router /menu/create [post]
+// @Router /api/v1/menu/create [post]
 func (c *MenuController) CreateMenu(ctx *app.Context) {
 	param := &model.Menu{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -69,7 +69,7 @@ func (c *MenuController) CreateMenu(ctx *app.Context) {
 // @Param Authorization header string true "token"
 // @Param params body model.Menu true "菜单信息"
 // @Success 200 {object} model.MenuPageResponse
-// @Router /menu/update [post]
+// @Router /api/v1/menu/update [post]
 func (c *MenuController) UpdateMenu(ctx *app.Context) {
 	param := &model.Menu{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -94,7 +94,7 @@ func (c *MenuController) UpdateMenu(ctx *app.Context) {
 // @Param Authorization header string true "token"
 // @Param params body model.ReqMenuDeleteParam true "删除参数"
 // @Success 200 {object} app.Response
-// @Router /menu/delete [post]
+// @Router /api/v1/menu/delete [post]
 func (c *MenuController) DeleteMenu(ctx *app.Context) {
 	param := &model.ReqMenuDeleteParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {

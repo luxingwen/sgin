@@ -19,7 +19,7 @@ type RoleController struct {
 // @Param Authorization header string true "token"
 // @Param params body model.ReqRoleQueryParam false "查询参数"
 // @Success 200 {object} model.RoleQueryResponse
-// @Router /role/list [post]
+// @Router /api/v1/role/list [post]
 func (c *RoleController) GetRoleList(ctx *app.Context) {
 	param := &model.ReqRoleQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -44,7 +44,7 @@ func (c *RoleController) GetRoleList(ctx *app.Context) {
 // @Param Authorization header string true "token"
 // @Param params body model.Role true "角色信息"
 // @Success 200 {object} model.RoleInfoResponse
-// @Router /role/create [post]
+// @Router /api/v1/role/create [post]
 func (c *RoleController) CreateRole(ctx *app.Context) {
 	param := &model.Role{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -69,7 +69,7 @@ func (c *RoleController) CreateRole(ctx *app.Context) {
 // @Param Authorization header string true "token"
 // @Param params body model.Role true "角色信息"
 // @Success 200 {object} app.Response "Successfully updated role"
-// @Router /role/update [post]
+// @Router /api/v1/role/update [post]
 func (c *RoleController) UpdateRole(ctx *app.Context) {
 	param := &model.Role{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
@@ -94,7 +94,7 @@ func (c *RoleController) UpdateRole(ctx *app.Context) {
 // @Param Authorization header string true "token"
 // @Param params body model.Role true "角色ID"
 // @Success 200 {object} app.Response "Successfully deleted role"
-// @Router /role/delete [post]
+// @Router /api/v1/role/delete [post]
 func (c *RoleController) DeleteRole(ctx *app.Context) {
 	param := &model.Role{}
 	if err := ctx.ShouldBindJSON(param); err != nil {

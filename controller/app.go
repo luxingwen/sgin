@@ -18,7 +18,7 @@ type AppController struct {
 // @Produce  json
 // @Param params body model.ReqAppQueryParam false "查询参数"
 // @Success 200 {object} model.AppQueryResponse
-// @Router /app/list [post]
+// @Router /api/v1/app/list [post]
 func (ac *AppController) GetAppList(c *app.Context) {
 	param := &model.ReqAppQueryParam{}
 	if err := c.ShouldBindJSON(param); err != nil {
@@ -41,7 +41,7 @@ func (ac *AppController) GetAppList(c *app.Context) {
 // @Produce  json
 // @Param params body model.App true "Create app"
 // @Success 200 {object} model.AppInfoResponse
-// @Router /app/create [post]
+// @Router /api/v1/app/create [post]
 func (ac *AppController) CreateApp(c *app.Context) {
 	var app model.App
 	if err := c.ShouldBindJSON(&app); err != nil {
@@ -64,7 +64,7 @@ func (ac *AppController) CreateApp(c *app.Context) {
 // @Produce  json
 // @Param params body model.App true "Update app"
 // @Success 200 {object} model.AppInfoResponse
-// @Router /app/update [post]
+// @Router /api/v1/app/update [post]
 func (ac *AppController) UpdateApp(c *app.Context) {
 	var app model.App
 	if err := c.ShouldBindJSON(&app); err != nil {
@@ -87,7 +87,7 @@ func (ac *AppController) UpdateApp(c *app.Context) {
 // @Produce  json
 // @Param params body model.ReqUuidParam true "Delete app"
 // @Success 200 {object} app.Response "Successfully delete user data"
-// @Router /app/delete [post]
+// @Router /api/v1/app/delete [post]
 func (ac *AppController) DeleteApp(c *app.Context) {
 	var app model.ReqUuidParam
 	if err := c.ShouldBindJSON(&app); err != nil {
