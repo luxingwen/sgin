@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"sgin/controller"
-	"sgin/model"
 	"sgin/pkg/app"
 	"sgin/pkg/config"
 	"sgin/routers"
@@ -37,7 +36,7 @@ import (
 func main() {
 	config.InitConfig()
 	serverApp := app.NewApp()
-	model.MigrateDbTable(serverApp.DB)
+	//model.MigrateDbTable(serverApp.DB)
 	serverApp.Use(app.RecoveryWithWriter(serverApp.Logger))
 
 	routers.InitRouter(serverApp)
@@ -47,7 +46,7 @@ func main() {
 		ctx.JSONSuccess("pong")
 	})
 
-	serverApp.NoRoute(app.NoRouterHandler(app.TestAbort()))
+	serverApp.NoRoute(app.NoRouterHandler())
 
 	v1 := serverApp.Group("/api/v1")
 	userController := &controller.UserController{Service: &service.UserService{}}
@@ -56,7 +55,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + serverApp.Config.ServerPort,
 		Handler: serverApp.Router,
 	}
 

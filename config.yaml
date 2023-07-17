@@ -1,3 +1,4 @@
+ServerPort: "8080"
 LogConfig:
   Level: "info"
   Format: "console"

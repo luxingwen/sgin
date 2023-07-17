@@ -151,6 +151,15 @@ func InitSwaggerRouter(ctx *app.App) {
 		c.Data(http.StatusOK, "application/json", jsonFile)
 	})
 
+	ctx.GET("/swagger/redoc.standalone.js", func(c *app.Context) {
+		b, err := ioutil.ReadFile("./swagger/redoc.standalone.js") // Replace with your actual json file path
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.Data(http.StatusOK, "text/html; charset=utf-8", b)
+	})
+
 	ctx.GET("/swagger/index.html", func(c *app.Context) {
 		b, err := ioutil.ReadFile("./swagger/swagger.html") // Replace with your actual json file path
 		if err != nil {
