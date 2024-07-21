@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"path/filepath"
 	"sgin/model"
 	"sgin/pkg/app"
 	"sgin/service"
@@ -100,6 +101,11 @@ func (uc *UserController) DeleteUser(c *app.Context) {
 		return
 	}
 
+	if params.Uuid == c.GetString("user_id") {
+		c.JSONError(http.StatusBadRequest, "You can't delete yourself")
+		return
+	}
+
 	err := uc.Service.DeleteUser(c, params.Uuid)
 	if err != nil {
 		c.JSONError(http.StatusInternalServerError, err.Error())
@@ -142,6 +148,54 @@ func (uc *UserController) GetUserList(c *app.Context) {
 func (uc *UserController) GetMyInfo(c *app.Context) {
 	userId := c.GetString("user_id")
 	user, err := uc.Service.GetUserByUUID(c, userId)
+	if err != nil {
+		c.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSONSuccess(user)
+}
+
+// 修改头像
+// @Summary 修改头像
+// @Tags 用户
+// @Accept json
+// @Produce json
+// @Param file formData file true "头像文件"
+// @Success 200 {object} model.UserInfoResponse
+// @Router /api/v1/user/avatar [post]
+func (uc *UserController) UpdateAvatar(c *app.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 保存头像
+
+	userid := c.GetString("user_id")
+	if userid == "" {
+		c.JSONError(http.StatusBadRequest, "user_id is required")
+		return
+	}
+
+	// 获取文件后缀
+
+	extfile := filepath.Ext(file.Filename)
+
+	filename := "/avatar/" + userid + extfile
+
+	err = c.SaveUploadedFile(file, c.Config.Upload.Dir+filename)
+	if err != nil {
+		c.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	user := model.User{
+		Avatar: filename,
+		Uuid:   userid,
+	}
+
+	err = uc.Service.UpdateUser(c, &user)
 	if err != nil {
 		c.JSONError(http.StatusInternalServerError, err.Error())
 		return

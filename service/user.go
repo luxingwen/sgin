@@ -3,11 +3,14 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/utils"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -19,12 +22,27 @@ func NewUserService() *UserService {
 }
 
 func (s *UserService) CreateUser(ctx *app.Context, user *model.User) error {
-	user.CreatedAt = time.Now()
+	user.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	user.UpdatedAt = user.CreatedAt
+	user.Uuid = uuid.New().String()
+
+	if user.Password == "" {
+		user.Password = "123456"
+	}
+
+	user.Password = utils.HashPasswordWithSalt(user.Password, ctx.Config.PasswdKey)
 
 	err := ctx.DB.Create(user).Error
 	if err != nil {
 		ctx.Logger.Error("Failed to create user", err)
+
+		if strings.Contains(err.Error(), fmt.Sprintf("Duplicate entry '%s' for key", user.Username)) {
+			return errors.New(user.Username + "用户名已存在")
+		}
+		if strings.Contains(err.Error(), fmt.Sprintf("Duplicate entry '%s' for key", user.Email)) {
+			return errors.New(user.Email + "邮箱已存在")
+		}
+
 		return errors.New("failed to create user")
 	}
 	return nil
@@ -44,10 +62,15 @@ func (s *UserService) GetUserByUUID(ctx *app.Context, uuid string) (*model.User,
 }
 
 func (s *UserService) UpdateUser(ctx *app.Context, user *model.User) error {
-	user.UpdatedAt = time.Now()
-	err := ctx.DB.Save(user).Error
+	user.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+	if user.Password != "" {
+		user.Password = utils.HashPasswordWithSalt(user.Password, ctx.Config.PasswdKey)
+	}
+
+	err := ctx.DB.Where("uuid = ?", user.Uuid).Updates(user).Error
 	if err != nil {
-		ctx.Logger.Error("Failed to update user", err)
+		ctx.Logger.Error("Failed to update user:", err)
 		return errors.New("failed to update user")
 	}
 
@@ -55,7 +78,7 @@ func (s *UserService) UpdateUser(ctx *app.Context, user *model.User) error {
 }
 
 func (s *UserService) DeleteUser(ctx *app.Context, uuid string) error {
-	err := ctx.DB.Where("uuid = ?", uuid).Delete(&model.User{}).Error
+	err := ctx.DB.Model(&model.User{}).Where("uuid = ?", uuid).Update("is_deleted", 1).Error
 	if err != nil {
 		ctx.Logger.Error("Failed to delete user", err)
 		return errors.New("failed to delete user")
@@ -102,6 +125,9 @@ func (s *UserService) GetUserList(ctx *app.Context, params *model.ReqUserQueryPa
 	if params.EndTime != "" {
 		db = db.Where("created_at <= ?", params.EndTime)
 	}
+
+	db = db.Where("is_deleted = ?", 0)
+
 	err = db.Count(&total).Error
 	if err != nil {
 		ctx.Logger.Error("Failed to get user list", err)
@@ -112,10 +138,32 @@ func (s *UserService) GetUserList(ctx *app.Context, params *model.ReqUserQueryPa
 		ctx.Logger.Error("Failed to get user list", err)
 		return nil, errors.New("failed to get user list")
 	}
+
+	for _, user := range users {
+		user.Password = ""
+	}
+
 	return &model.PagedResponse{
 		Total:    total,
 		Data:     users,
 		Current:  params.Current,
 		PageSize: params.PageSize,
 	}, nil
+}
+
+// 根据用户UUID列表获取用户列表
+func (s *UserService) GetUsersByUUIDs(ctx *app.Context, uuids []string) (map[string]*model.User, error) {
+	users := make([]*model.User, 0)
+	err := ctx.DB.Where("uuid IN (?)", uuids).Find(&users).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get users by UUIDs", err)
+		return nil, errors.New("failed to get users by UUIDs")
+	}
+
+	userMap := make(map[string]*model.User)
+	for _, user := range users {
+		userMap[user.Uuid] = user
+	}
+
+	return userMap, nil
 }
