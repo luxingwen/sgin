@@ -202,3 +202,14 @@ func (uc *UserController) UpdateAvatar(c *app.Context) {
 	}
 	c.JSONSuccess(user)
 }
+
+// 获取所有用户
+
+func (uc *UserController) GetAllUsers(c *app.Context) {
+	users, err := uc.Service.GetAllUsers(c)
+	if err != nil {
+		c.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSONSuccess(users)
+}

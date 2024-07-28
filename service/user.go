@@ -87,6 +87,18 @@ func (s *UserService) DeleteUser(ctx *app.Context, uuid string) error {
 	return nil
 }
 
+// 获取所有可用用户
+func (s *UserService) GetAllUsers(ctx *app.Context) ([]*model.User, error) {
+	users := make([]*model.User, 0)
+	err := ctx.DB.Where("is_deleted = ?", 0).Find(&users).Error
+	if err != nil {
+		ctx.Logger.Error("Failed to get all users", err)
+		return nil, errors.New("failed to get all users")
+	}
+
+	return users, nil
+}
+
 // 根据用户名或邮箱获取用户
 func (s *UserService) GetUserByUsernameOrEmail(ctx *app.Context, usernameOrEmail string) (*model.User, error) {
 	user := &model.User{}
