@@ -141,6 +141,36 @@ func InitTeamRouter(ctx *app.App) {
 	}
 }
 
+func InitSysApiRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+
+	{
+		apiController := &controller.APIController{
+			APIService: &service.APIService{},
+		}
+		v1.POST("/sys_api/create", apiController.CreateAPI)
+		v1.POST("/sys_api/update", apiController.UpdateAPI)
+		v1.POST("/sys_api/delete", apiController.DeleteAPI)
+		v1.POST("/sys_api/list", apiController.GetAPIList)
+		v1.POST("/sys_api/info", apiController.GetAPIInfo)
+
+	}
+}
+
+func InitSysOpLogRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+
+	{
+		sysOpLogController := &controller.SysOpLogController{
+			SysOpLogService: &service.SysOpLogService{},
+		}
+
+		v1.POST("/sysoplog/delete", sysOpLogController.DeleteSysOpLog)
+		v1.POST("/sysoplog/info", sysOpLogController.GetSysOpLogInfo)
+		v1.POST("/sysoplog/list", sysOpLogController.GetSysOpLogList)
+	}
+}
+
 func InitSwaggerRouter(ctx *app.App) {
 	ctx.GET("/swagger/doc.json", func(c *app.Context) {
 		jsonFile, err := ioutil.ReadFile("./docs/swagger.json") // Replace with your actual json file path

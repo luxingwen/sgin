@@ -137,3 +137,7 @@ type ReqAPIQueryParam struct {
 	Status int    `json:"status"`
 	Pagination
 }
+
+type ReqIdParam struct {
+	Id int64 `json:"id"`
+}
