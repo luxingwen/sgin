@@ -2,6 +2,7 @@ package routers
 
 import (
 	"sgin/controller"
+	"sgin/middleware"
 	"sgin/pkg/app"
 
 	"io/ioutil"
@@ -21,10 +22,15 @@ func InitRouter(ctx *app.App) {
 	InitLoginRouter(ctx)
 	InitServerRouter(ctx)
 	InitTeamRouter(ctx)
+	InitSysLoginLogRouter(ctx)
+	InitSysOpLogRouter(ctx)
+	InitSysApiRouter(ctx)
 }
 
 func InitUserRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		userController := &controller.UserController{
 			Service: &service.UserService{},
@@ -36,6 +42,7 @@ func InitUserRouter(ctx *app.App) {
 		v1.POST("/user/update", userController.UpdateUser)
 		v1.POST("/user/delete", userController.DeleteUser)
 		v1.GET("/user/myinfo", userController.GetMyInfo)
+		v1.POST("/user/avatar", userController.UpdateAvatar)
 
 	}
 
@@ -54,6 +61,8 @@ func InitUserRouter(ctx *app.App) {
 
 func InitMenuRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		menuController := &controller.MenuController{
 			MenuService: &service.MenuService{},
@@ -67,6 +76,8 @@ func InitMenuRouter(ctx *app.App) {
 
 func InitAppRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		appController := &controller.AppController{
 			AppService: &service.AppService{},
@@ -114,6 +125,8 @@ func InitLoginRouter(ctx *app.App) {
 // 服务的路由
 func InitServerRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		serverController := &controller.ServerController{
 			ServerService: &service.ServerService{},
@@ -129,6 +142,8 @@ func InitServerRouter(ctx *app.App) {
 // 团队的路由
 func InitTeamRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		teamController := &controller.TeamController{
 			TeamService: &service.TeamService{},
@@ -143,7 +158,8 @@ func InitTeamRouter(ctx *app.App) {
 
 func InitSysApiRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
-
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		apiController := &controller.APIController{
 			APIService: &service.APIService{},
@@ -159,7 +175,8 @@ func InitSysApiRouter(ctx *app.App) {
 
 func InitSysOpLogRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
-
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
 	{
 		sysOpLogController := &controller.SysOpLogController{
 			SysOpLogService: &service.SysOpLogService{},
@@ -168,6 +185,20 @@ func InitSysOpLogRouter(ctx *app.App) {
 		v1.POST("/sysoplog/delete", sysOpLogController.DeleteSysOpLog)
 		v1.POST("/sysoplog/info", sysOpLogController.GetSysOpLogInfo)
 		v1.POST("/sysoplog/list", sysOpLogController.GetSysOpLogList)
+	}
+}
+
+func InitSysLoginLogRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	{
+		sysLoginLogController := &controller.SysLoginLogController{
+			LoginLogService: &service.SysLoginLogService{},
+		}
+
+		v1.POST("/sys_login_log/info", sysLoginLogController.GetLoginLog)
+		v1.POST("/sys_login_log/list", sysLoginLogController.GetLoginLogList)
 	}
 }
 

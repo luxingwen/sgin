@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"sgin/controller"
+	"sgin/model"
 	"sgin/pkg/app"
 	"sgin/pkg/config"
 	"sgin/routers"
@@ -36,7 +37,7 @@ import (
 func main() {
 	config.InitConfig()
 	serverApp := app.NewApp()
-	//model.MigrateDbTable(serverApp.DB)
+	model.MigrateDbTable(serverApp.DB)
 	serverApp.Use(app.RecoveryWithWriter(serverApp.Logger))
 
 	routers.InitRouter(serverApp)
@@ -45,6 +46,7 @@ func main() {
 		panic("test panic")
 		ctx.JSONSuccess("pong")
 	})
+	serverApp.Router.Static("/public", serverApp.Config.Upload.Dir)
 
 	serverApp.NoRoute(app.NoRouterHandler())
 

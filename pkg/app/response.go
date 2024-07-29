@@ -21,7 +21,8 @@ func (ctx *Context) JSONSuccess(data interface{}) {
 		Message: "Success",
 		Data:    data,
 	}
-
+	ctx.Set("code", http.StatusOK)
+	ctx.Set("message", "Success")
 	ctx.JSON(http.StatusOK, response)
 }
 
@@ -32,6 +33,8 @@ func (ctx *Context) JSONError(code int, message string) {
 		Message: message,
 		Data:    nil,
 	}
+	ctx.Set("code", code)
+	ctx.Set("message", message)
 
 	ctx.JSON(http.StatusOK, response)
 }
