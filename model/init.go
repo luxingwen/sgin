@@ -25,6 +25,10 @@ func MigrateDbTable(db *gorm.DB) {
 		&SysLoginLog{},
 		&SysOpLog{},
 		&SysAPI{},
+		&Permission{},
+		&PermissionMenu{},
+		&UserPermission{},
+		&MenuAPI{},
 	)
 
 	// 创建默认用户

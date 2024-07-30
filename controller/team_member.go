@@ -58,3 +58,19 @@ func (t *TeamMemberController) DeleteTeamMember(ctx *app.Context) {
 	}
 	ctx.JSONSuccess("ok")
 }
+
+// 查询团队成员列表
+
+func (t *TeamMemberController) GetTeamMemberList(ctx *app.Context) {
+	var param model.ReqTeamMemberQueryParam
+	if err := ctx.ShouldBindJSON(&param); err != nil {
+		ctx.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
+	teamMembers, err := t.TeamMemberService.GetTeamMemberUserList(ctx, &param)
+	if err != nil {
+		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+	ctx.JSONSuccess(teamMembers)
+}

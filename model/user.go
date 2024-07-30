@@ -15,4 +15,5 @@ type User struct {
 	Signed    string `gorm:"type:varchar(255)" json:"signed"`          // 个性签名
 	CreatedAt string `gorm:"autoCreateTime" json:"created_at"`         // 创建时间
 	UpdatedAt string `gorm:"autoUpdateTime" json:"updated_at"`         // 更新时间
+	IsDeleted int    `gorm:"type:int" json:"is_deleted"`               // 是否删除 1:删除 0:未删除
 }

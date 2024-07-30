@@ -13,6 +13,7 @@ func (p *Pagination) GetOffset() int {
 
 // 角色查询参数
 type ReqRoleQueryParam struct {
+	TeamUuid string `json:"team_uuid"`
 	Name     string `form:"name"`
 	IsActive bool   `form:"is_active"`
 	Pagination
@@ -140,4 +141,27 @@ type ReqAPIQueryParam struct {
 
 type ReqIdParam struct {
 	Id int64 `json:"id"`
+}
+
+type ReqPermissionQueryParam struct {
+	Name string `json:"name"`
+	Pagination
+}
+
+type ReqUserPermissionQueryParam struct {
+	UserUuid       string `json:"user_uuid"`
+	PermissionUuid string `json:"permission_uuid"`
+	Pagination
+}
+
+type ReqPermissionMenuQueryParam struct {
+	PermissionUuid string `json:"permission_uuid"`
+	MenuUuid       string `json:"menu_uuid"`
+	Pagination
+}
+
+type ReqMenuAPIQueryParam struct {
+	MenuUUID string `json:"menu_uuid"`
+	APIUUID  string `json:"api_uuid"`
+	Pagination
 }

@@ -110,3 +110,17 @@ func (c *MenuController) DeleteMenu(ctx *app.Context) {
 
 	ctx.JSONSuccess("ok")
 }
+
+func (c *MenuController) GetMenuInfo(ctx *app.Context) {
+	param := &model.ReqUuidParam{}
+	if err := ctx.ShouldBindJSON(param); err != nil {
+		ctx.JSONError(http.StatusBadRequest, err.Error())
+		return
+	}
+	menu, err := c.MenuService.GetMenuByUUID(ctx, param.Uuid)
+	if err != nil {
+		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		return
+	}
+	ctx.JSONSuccess(menu)
+}

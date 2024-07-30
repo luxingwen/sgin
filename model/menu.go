@@ -20,8 +20,14 @@ type Menu struct {
 // MenuAPI 结构体用于表示关联关系
 type MenuAPI struct {
 	Id        uint      `gorm:"primary_key" json:"id"` // ID 是关联关系的主键
+	Uuid      string    `gorm:"type:char(36);index" json:"uuid"`
 	MenuUUID  string    `gorm:"type:char(36);index" json:"menu_uuid"`
 	APIUUID   string    `gorm:"type:char(36);index" json:"api_uuid"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+}
+
+type ReqMenuAPICreate struct {
+	MenuUUID string   `json:"menu_uuid" binding:"required"`
+	APIUUIDs []string `json:"api_uuids" binding:"required"`
 }

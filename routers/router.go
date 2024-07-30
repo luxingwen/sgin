@@ -25,6 +25,11 @@ func InitRouter(ctx *app.App) {
 	InitSysLoginLogRouter(ctx)
 	InitSysOpLogRouter(ctx)
 	InitSysApiRouter(ctx)
+	InitPermissionRouter(ctx)
+	InitPermissionMenuRouter(ctx)
+	InitPermissionUserRouter(ctx)
+	InitMenuAPIRouter(ctx)
+	InitTeamMemberRouter(ctx)
 }
 
 func InitUserRouter(ctx *app.App) {
@@ -43,6 +48,7 @@ func InitUserRouter(ctx *app.App) {
 		v1.POST("/user/delete", userController.DeleteUser)
 		v1.GET("/user/myinfo", userController.GetMyInfo)
 		v1.POST("/user/avatar", userController.UpdateAvatar)
+		v1.POST("/user/all", userController.GetAllUsers)
 
 	}
 
@@ -71,6 +77,7 @@ func InitMenuRouter(ctx *app.App) {
 		v1.POST("/menu/list", menuController.GetMenuList)
 		v1.POST("/menu/update", menuController.UpdateMenu)
 		v1.POST("/menu/delete", menuController.DeleteMenu)
+		v1.POST("/menu/info", menuController.GetMenuInfo)
 	}
 }
 
@@ -156,6 +163,20 @@ func InitTeamRouter(ctx *app.App) {
 	}
 }
 
+func InitTeamMemberRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	{
+		teamMemberController := &controller.TeamMemberController{
+			TeamMemberService: &service.TeamMemberService{},
+		}
+		v1.POST("/team_member/create", teamMemberController.CreateTeamMember)
+		v1.POST("/team_member/delete", teamMemberController.DeleteTeamMember)
+		v1.POST("/team_member/list", teamMemberController.GetTeamMemberList)
+	}
+}
+
 func InitSysApiRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	v1.Use(middleware.LoginCheck())
@@ -199,6 +220,73 @@ func InitSysLoginLogRouter(ctx *app.App) {
 
 		v1.POST("/sys_login_log/info", sysLoginLogController.GetLoginLog)
 		v1.POST("/sys_login_log/list", sysLoginLogController.GetLoginLogList)
+	}
+}
+
+func InitPermissionRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	{
+		permissionController := &controller.PermissionController{
+			PermissionService: &service.PermissionService{},
+		}
+		v1.POST("/permission/create", permissionController.CreatePermission)
+		v1.POST("/permission/update", permissionController.UpdatePermission)
+		v1.POST("/permission/delete", permissionController.DeletePermission)
+		v1.POST("/permission/info", permissionController.GetPermissionInfo)
+		v1.POST("/permission/list", permissionController.GetPermissionList)
+	}
+}
+
+func InitPermissionMenuRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	{
+		permissionMenuController := &controller.PermissionMenuController{
+			PermissionMenuService: &service.PermissionMenuService{},
+		}
+		v1.POST("/permission_menu/create", permissionMenuController.CreatePermissionMenu)
+		v1.POST("/permission_menu/update", permissionMenuController.UpdatePermissionMenu)
+		v1.POST("/permission_menu/delete", permissionMenuController.DeletePermissionMenu)
+		v1.POST("/permission_menu/info", permissionMenuController.GetPermissionMenuInfo)
+		v1.POST("/permission_menu/info_menu", permissionMenuController.GetPermissionMenuListByPermissionUUID)
+		v1.POST("/permission_menu/list", permissionMenuController.GetPermissionMenuList)
+	}
+}
+
+func InitPermissionUserRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	{
+		permissionUserController := &controller.UserPermissionController{
+			UserPermissionService: &service.UserPermissionService{},
+		}
+		v1.POST("/permission_user/create", permissionUserController.CreateUserPermission)
+		v1.POST("/permission_user/update", permissionUserController.UpdateUserPermission)
+		v1.POST("/permission_user/delete", permissionUserController.DeleteUserPermission)
+		v1.POST("/permission_user/info", permissionUserController.GetUserPermissionInfo)
+		v1.POST("/permission_user/list", permissionUserController.GetUserPermissionList)
+	}
+}
+
+func InitMenuAPIRouter(ctx *app.App) {
+	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
+	v1.Use(middleware.LoginCheck())
+	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	{
+		menuAPIController := &controller.MenuAPIController{
+			MenuAPIService: &service.MenuAPIService{},
+		}
+		v1.POST("/menu_api/create", menuAPIController.CreateMenuAPI)
+		v1.POST("/menu_api/update", menuAPIController.UpdateMenuAPI)
+		v1.POST("/menu_api/delete", menuAPIController.DeleteMenuAPI)
+		v1.POST("/menu_api/info", menuAPIController.GetMenuAPIInfo)
+		v1.POST("/menu_api/info_menu", menuAPIController.GetMenuAPIListByMenuUUID)
+		v1.POST("/menu_api/info_api", menuAPIController.GetMenuAPIListByAPIUUID)
+		v1.POST("/menu_api/list", menuAPIController.GetMenuAPIList)
 	}
 }
 

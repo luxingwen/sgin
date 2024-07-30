@@ -7,6 +7,7 @@ import (
 	"sgin/model"
 	"sgin/pkg/app"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +21,7 @@ func NewRoleService() *RoleService {
 func (s *RoleService) CreateRole(ctx *app.Context, role *model.Role) error {
 	role.CreatedAt = time.Now()
 	role.UpdatedAt = role.CreatedAt
+	role.Uuid = uuid.New().String()
 
 	err := ctx.DB.Create(role).Error
 	if err != nil {
@@ -67,6 +69,7 @@ func (s *RoleService) DeleteRole(ctx *app.Context, uuid string) error {
 func (s *RoleService) GetRoleList(ctx *app.Context, param *model.ReqRoleQueryParam) (r *model.PagedResponse, err error) {
 	roles := make([]*model.Role, 0)
 	query := ctx.DB.Model(&model.Role{})
+	query = query.Where("team_uuid = ?", param.TeamUuid)
 	if param.Name != "" {
 		query = query.Where("name like ?", "%"+param.Name+"%")
 	}
