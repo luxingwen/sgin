@@ -27,6 +27,7 @@ func (s *MenuAPIService) CreateMenuAPI(ctx *app.Context, menuAPI *model.ReqMenuA
 		err := tx.Where("menu_uuid = ?", menuAPI.MenuUUID).Delete(&model.MenuAPI{}).Error
 		if err != nil {
 			ctx.Logger.Error("Failed to delete menu API by menu UUID", err)
+			tx.Rollback()
 			return errors.New("failed to delete menu API by menu UUID")
 		}
 
@@ -46,6 +47,7 @@ func (s *MenuAPIService) CreateMenuAPI(ctx *app.Context, menuAPI *model.ReqMenuA
 		err = tx.Create(&rlist).Error
 		if err != nil {
 			ctx.Logger.Error("Failed to create menu API", err)
+			tx.Rollback()
 			return errors.New("failed to create menu API")
 		}
 

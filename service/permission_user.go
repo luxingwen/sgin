@@ -27,6 +27,7 @@ func (s *UserPermissionService) CreateUserPermission(ctx *app.Context, userPermi
 		err := tx.Where("user_uuid = ?", userPermission.UserUuid).Delete(&model.UserPermission{}).Error
 		if err != nil {
 			ctx.Logger.Error("Failed to delete user permission by user UUID", err)
+			tx.Rollback()
 			return errors.New("failed to delete user permission by user UUID")
 		}
 
@@ -44,6 +45,7 @@ func (s *UserPermissionService) CreateUserPermission(ctx *app.Context, userPermi
 		err = tx.Create(&rlist).Error
 		if err != nil {
 			ctx.Logger.Error("Failed to create user permission", err)
+			tx.Rollback()
 			return errors.New("failed to create user permission")
 		}
 

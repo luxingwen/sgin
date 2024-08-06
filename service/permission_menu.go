@@ -27,6 +27,7 @@ func (s *PermissionMenuService) CreatePermissionMenu(ctx *app.Context, permissio
 		err := tx.Where("permission_uuid = ?", permissionMenu.PermissionUuid).Delete(&model.PermissionMenu{}).Error
 		if err != nil {
 			ctx.Logger.Error("Failed to delete permission menu by menu UUID", err)
+			tx.Rollback()
 			return errors.New("failed to delete permission menu by menu UUID")
 		}
 
