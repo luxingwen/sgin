@@ -49,11 +49,16 @@ func (pc *{{.StructName}}Controller) Get{{.StructName}}Info(c *app.Context) {
 		return
 	}
 
-	{{.LowerStructName}}, err := pc.{{.StructName}}Service.Get{{.StructName}}ByUUID(c, param.Uuid)
+    {{if .IsResStruct}}
+	{{.LowerStructName}}, err := pc.{{.StructName}}Service.Get{{.ResStructName}}ByUUID(c, param.Uuid)
+    {{else}}
+    {{.LowerStructName}}, err := pc.{{.StructName}}Service.Get{{.StructName}}ByUUID(c, param.Uuid)
+    {{end}}
 	if err != nil {
 		c.JSONError(http.StatusInternalServerError, err.Error())
 		return
 	}
+    
 	c.JSONSuccess({{.LowerStructName}})
 }
 

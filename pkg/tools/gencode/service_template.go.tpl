@@ -31,6 +31,7 @@ func (s *{{.StructName}}Service) Create{{.StructName}}(ctx *app.Context, {{.Stru
 	return nil
 }
 
+
 func (s *{{.StructName}}Service) Get{{.StructName}}ByUUID(ctx *app.Context, uuid string) (*model.{{.StructName}}, error) {
 	{{.StructName | lower}} := &model.{{.StructName}}{}
 	err := ctx.DB.Where("uuid = ?", uuid).First({{.StructName | lower}}).Error
@@ -43,6 +44,39 @@ func (s *{{.StructName}}Service) Get{{.StructName}}ByUUID(ctx *app.Context, uuid
 	}
 	return {{.StructName | lower}}, nil
 }
+
+
+{{if .RelatedItems}}
+func (s *{{.StructName}}Service) Get{{.ResStructName}}ByUUID(ctx *app.Context, uuid string) (*model.{{.ResStructName}}, error) {
+	{{.StructName | lower}} := &model.{{.StructName}}{}
+	err := ctx.DB.Where("uuid = ?", uuid).First({{.StructName | lower}}).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("{{.StructName | lower}} not found")
+		}
+		ctx.Logger.Error("Failed to get {{.StructName | lower}} by UUID", err)
+		return nil, errors.New("failed to get {{.StructName | lower}} by UUID")
+	}
+
+	itemRes:=&model.{{.ResStructName}}{
+		{{.StructName}}: *{{.StructName | lower}},
+	}
+
+	// 动态获取多个关联项
+	{{range .RelatedItems}}
+	{{.Key}}, err := New{{.TypeName}}Service().Get{{.TypeName}}ByUUID(ctx, {{$.StructName | lower}}.{{.KeyField}})
+	if err != nil {
+		ctx.Logger.Error("Failed to get related New{{.TypeName}}Service().Get{{.TypeName}}ByUUID", err)
+		return nil, errors.New("failed to get related New{{.TypeName}}Service().Get{{.TypeName}}ByUUID")
+	}
+	itemRes.{{.FieldName}} = {{.Key}}
+	{{end}}
+
+	return itemRes, nil
+}
+
+{{end}}
+
 
 func (s *{{.StructName}}Service) Update{{.StructName}}(ctx *app.Context, {{.StructName | lower}} *model.{{.StructName}}) error {
 	{{.StructName | lower}}.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
@@ -118,20 +152,22 @@ func (s *{{.StructName}}Service) Get{{.StructName}}List(ctx *app.Context, params
 
 	{{if .RelatedItems}}
 	// 提取关键字段列表
-	keyFieldList := make([]string, 0)
+	{{range  .RelatedItems}}
+	 {{.Key}}IdList  := make([]string, 0)
+	{{end}}
 	for _, item := range {{.LowerStructName}}s {
-		keyFieldList = append(keyFieldList, item.{{.KeyField}})
+		{{range  .RelatedItems}}
+			{{.Key}}IdList = append({{.Key}}IdList, item.{{.KeyField}})
+		{{end}}
 	}
 
 	// 动态获取多个关联项
-	relatedData := make(map[string]interface{})
 	{{range .RelatedItems}}
-	related{{.FunctionName}}, err := s.{{.FunctionName}}(ctx, keyFieldList)
+	{{.Key}}Map, err := {{.FunctionName}}(ctx, {{.Key}}IdList)
 	if err != nil {
 		ctx.Logger.Error("Failed to get related {{.FunctionName | lower}}", err)
 		return nil, errors.New("failed to get related {{.FunctionName | lower}}")
 	}
-	relatedData["{{.Key}}"] = related{{.FunctionName}}
 	{{end}}
 
 	// 构造最终响应列表
@@ -141,8 +177,8 @@ func (s *{{.StructName}}Service) Get{{.StructName}}List(ctx *app.Context, params
 			{{.StructName}}: *item,
 		}
 		{{range .RelatedItems}}
-		if relatedItems, ok := relatedData["{{.Key}}"].(map[string]{{.ReturnType}})[item.{{.KeyField}}]; ok {
-			itemRes.{{.FieldName}} = relatedItems
+		if {{.Key}}, ok := {{.Key}}Map[item.{{.KeyField}}]; ok {
+			itemRes.{{.FieldName}} = {{.Key}}
 		}
 		{{end}}
 		res = append(res, itemRes)

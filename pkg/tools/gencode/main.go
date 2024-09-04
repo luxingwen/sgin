@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sgin/model"
 	"strings"
 	"text/template"
 )
@@ -18,6 +19,7 @@ type RelatedItem struct {
 	FunctionName string // 关联项获取函数名，例如 GetOrderItemsByOrderNoList
 	Key          string // 关联项映射的 key
 	KeyField     string // 关联项在主对象中的字段，例如 OrderNo
+	TypeName     string // 关联项的类型名，例如 OrderItem
 	FieldName    string // 映射到最终响应中的字段名，例如 Items
 	ReturnType   string // 关联函数的返回类型，如 []*OrderItemRes
 }
@@ -45,6 +47,7 @@ type CombinedTemplateData struct {
 	LowerQueryStructName  string
 	ReqCreateStructName   string
 	ResStructName         string
+	IsResStruct           bool
 	ModuleName            string // 新增字段，模块名
 	HasIsDeletedField     bool
 	HasGetListFunction    bool
@@ -122,6 +125,11 @@ func extractStructInfo(data *CombinedTemplateData) {
 	resVal := reflect.TypeOf(data.ResStructType)
 	data.ResStructName = resVal.Name()
 
+	// 判断 ResStructName 是否是 Res 结尾
+	if strings.HasSuffix(data.ResStructName, "Res") {
+		data.IsResStruct = true
+	}
+
 	// 查找第一个带 unique_index 的字段作为 KeyField 和 DBFieldName
 	for i := 0; i < structVal.NumField(); i++ {
 		field := structVal.Field(i)
@@ -173,25 +181,42 @@ func extractStructInfo(data *CombinedTemplateData) {
 
 // 自动生成 RelatedItems
 func generateRelatedItems(data *CombinedTemplateData) {
+	fmt.Println("generateRelatedItems")
 	resVal := reflect.TypeOf(data.ResStructType)
 	if resVal.Kind() == reflect.Struct {
 		for i := 0; i < resVal.NumField(); i++ {
 			field := resVal.Field(i)
-			if field.Type.Kind() == reflect.Slice && field.Type.Elem().Kind() == reflect.Ptr {
-				elemType := field.Type.Elem().Elem()
+			//if field.Type.Kind() == reflect.Slice && field.Type.Elem().Kind() == reflect.Ptr {
+			if field.Type.Kind() == reflect.Ptr {
+
+				elemType := field.Type.Elem()
+
+				typeName := elemType.Name()
+
 				fieldName := field.Name
 				tag := field.Tag.Get("json")
+				// 如果tag以info结尾，则去掉info
+				if strings.HasSuffix(tag, "_info") {
+					tag = tag[:len(tag)-5]
+				}
+				keyField := fieldName
+				// 如果keyField以Info结尾，则去掉Info
+				if strings.HasSuffix(keyField, "Info") {
+					keyField = keyField[:len(keyField)-4]
+				}
 				relatedItem := RelatedItem{
-					FunctionName: fmt.Sprintf("Get%sBy%sList", elemType.Name(), data.KeyField),
+					FunctionName: fmt.Sprintf("New%sService().Get%sByUuidList", typeName, typeName),
 					Key:          strings.ToLower(tag),
-					KeyField:     data.KeyField,
+					KeyField:     keyField,
 					FieldName:    fieldName,
+					TypeName:     typeName,
 					ReturnType:   fmt.Sprintf("[]*%s", elemType.Name()),
 				}
 				data.RelatedItems = append(data.RelatedItems, relatedItem)
 			}
 		}
 	}
+	fmt.Println(data.RelatedItems)
 }
 
 // Generate combined code based on CombinedTemplateData
@@ -320,16 +345,15 @@ func main() {
 		return
 	}
 
-	// Prepare data for code generation
-	// data := &CombinedTemplateData{
-	// 	ModuleName:          "文章",
-	// 	HasGetListFunction:  true,
-	// 	StructType:          model.Article{},
-	// 	QueryStructType:     model.ReqArticleQueryParam{},
-	// 	ReqCreateStructType: model.ReqCreateArticle{},
-	// 	ResStructType:       model.Article{},
-	// }
+	data := &CombinedTemplateData{
+		ModuleName:          "文章",
+		HasGetListFunction:  true,
+		StructType:          model.Article{},
+		QueryStructType:     model.ReqArticleQueryParam{},
+		ReqCreateStructType: model.ReqCreateArticle{},
+		ResStructType:       model.ArticleRes{},
+	}
 
-	//GenCode(data, config)
+	GenCode(data, config)
 
 }
