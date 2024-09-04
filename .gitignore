@@ -8,3 +8,4 @@ cmd/cmd
 vendor
 docs
 *.exe
+pkg/tools/gencode/config.json

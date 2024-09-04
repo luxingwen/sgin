@@ -2,13 +2,10 @@ package service
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"sgin/model"
 	"sgin/pkg/app"
-	"sgin/pkg/utils"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -98,6 +95,13 @@ func (s *{{.StructName}}Service) Get{{.StructName}}List(ctx *app.Context, params
 	}
 	{{end}}
 
+	if params.StartTime != "" {
+		db = db.Where("created_at >= ?", params.StartTime)
+	}
+	if params.EndTime != "" {
+		db = db.Where("created_at <= ?", params.EndTime)
+	}
+
 	// 获取记录总数
 	err = db.Count(&total).Error
 	if err != nil {
@@ -112,6 +116,7 @@ func (s *{{.StructName}}Service) Get{{.StructName}}List(ctx *app.Context, params
 		return nil, errors.New("failed to get {{.LowerStructName}} list")
 	}
 
+	{{if .RelatedItems}}
 	// 提取关键字段列表
 	keyFieldList := make([]string, 0)
 	for _, item := range {{.LowerStructName}}s {
@@ -144,11 +149,20 @@ func (s *{{.StructName}}Service) Get{{.StructName}}List(ctx *app.Context, params
 	}
 
 	return &model.PagedResponse{
-		Total: total,
-		Data:  res,
-		Current: params.Current,
+		Total:    total,
+		Data:     res,
+		Current:  params.Current,
 		PageSize: params.PageSize,
 	}, nil
+	{{else}}
+	// 构造简单响应列表
+	return &model.PagedResponse{
+		Total:    total,
+		Data:     {{.LowerStructName}}s,
+		Current:  params.Current,
+		PageSize: params.PageSize,
+	}, nil
+	{{end}}
 }
 {{end}}
 
@@ -162,7 +176,7 @@ func (s *{{.StructName}}Service) Get{{.StructName}}List(ctx *app.Context, params
 func (s *{{.StructName}}Service) Get{{.StructName}}ByUUIDList(ctx *app.Context, uuidList []string) (map[string]*model.{{.StructName}}, error) {
 	{{.LowerStructName}}Map := make(map[string]*model.{{.StructName}}, 0)
 	var {{.LowerStructName}}s []*model.{{.StructName}}
-	err := ctx.DB.Where("uuid IN (?)", uuidList).Find(&{{.LowerStructName}}s).Error
+	err := ctx.DB.Where("{{.DBFieldName}} IN (?)", uuidList).Find(&{{.LowerStructName}}s).Error
 	if err != nil {
 		ctx.Logger.Error("Failed to get {{.LowerStructName}} list by UUID list", err)
 		return nil, errors.New("failed to get {{.LowerStructName}} list by UUID list")

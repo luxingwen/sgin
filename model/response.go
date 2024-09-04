@@ -17,6 +17,11 @@ type BaseResponse struct {
 	Message string `json:"message"`  // 提示信息
 }
 
+type StringDataResponse struct {
+	BaseResponse
+	Data string `json:"data"`
+}
+
 type UserInfoResponse struct {
 	BaseResponse
 	Data User `json:"data"`
