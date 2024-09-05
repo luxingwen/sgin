@@ -62,6 +62,34 @@ type CombinedTemplateData struct {
 	RelatedItems          []RelatedItem
 	Conditions            []QueryCondition
 	HasDateRange          bool
+
+	// 以下字段用于生成ts的模板变量
+	Fields           []FieldInfo
+	HasQueryParams   bool
+	QueryFields      []FieldInfo
+	HasCreateRequest bool
+	CreateFields     []FieldInfo
+}
+
+// FieldInfo 包含字段的信息
+type FieldInfo struct {
+	Name    string // 字段名
+	Type    string // 字段类型
+	Comment string // 字段注释
+}
+
+// GoToTSType 将 Go 类型转换为 TypeScript 类型
+func GoToTSType(goType string) string {
+	switch goType {
+	case "string":
+		return "string"
+	case "int", "int64", "int32", "float32", "float64":
+		return "number"
+	case "bool":
+		return "boolean"
+	default:
+		return goType // 对于自定义类型可以进一步处理
+	}
 }
 
 // Helper function to make the first letter of a string lowercase
@@ -100,6 +128,52 @@ func loadTemplate(filename string) (*template.Template, error) {
 	return template.New("combined").Funcs(template.FuncMap{
 		"lower": lower,
 	}).Parse(string(content))
+}
+
+// ExtractFields 提取结构体字段信息
+func ExtractFields(structType reflect.Type) []FieldInfo {
+	fields := []FieldInfo{}
+	for i := 0; i < structType.NumField(); i++ {
+		field := structType.Field(i)
+		fieldInfo := FieldInfo{
+			Name:    strings.ToLower(field.Tag.Get("json")),
+			Type:    GoToTSType(field.Type.Name()),
+			Comment: field.Tag.Get("comment"), // 假设注释在 comment 标签中
+		}
+		fields = append(fields, fieldInfo)
+	}
+	return fields
+}
+
+// GenerateTypeScript 生成 TypeScript 类型代码
+func GenerateTypeScript(data *CombinedTemplateData, templateFile string) string {
+	tmpl, err := template.ParseFiles(templateFile)
+	if err != nil {
+		panic(err)
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		panic(err)
+	}
+
+	return buf.String()
+}
+
+// extract ts info
+func extractTsInfo(data *CombinedTemplateData) {
+	data.Fields = ExtractFields(reflect.TypeOf(data.StructType))
+	data.QueryFields = ExtractFields(reflect.TypeOf(data.QueryStructType))
+	data.CreateFields = ExtractFields(reflect.TypeOf(data.ReqCreateStructType))
+
+	if len(data.QueryFields) > 0 {
+		data.HasQueryParams = true
+	}
+
+	if len(data.CreateFields) > 0 {
+		data.HasCreateRequest = true
+	}
+
 }
 
 // Extract struct information and conditions
@@ -354,6 +428,16 @@ func main() {
 		ResStructType:       model.ArticleRes{},
 	}
 
-	GenCode(data, config)
+	// GenCode(data, config)
+
+	_ = config
+	extractStructInfo(data)
+	extractTsInfo(data)
+
+	// 生成代码
+	code := GenerateTypeScript(data, "ts_type_template.tmpl")
+
+	// 输出或写入文件
+	fmt.Println(code)
 
 }

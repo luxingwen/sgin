@@ -1,0 +1,21 @@
+// TypeScript 类型模板 
+export interface {{.StructName}} {
+{{range .Fields}}  {{.Name}}: {{.Type}}; // {{.Comment}}
+{{end}}
+}
+
+{{if .HasQueryParams}}
+// 查询参数请求体
+export interface Req{{.StructName}}QueryParam extends BaseQueryParams {
+{{range .QueryFields}}  {{.Name}}?: {{.Type}}; // {{.Comment}}
+{{end}}
+}
+{{end}}
+
+{{if .HasCreateRequest}}
+// 创建请求体
+export interface Req{{.StructName}}Create {
+{{range .CreateFields}}  {{.Name}}: {{.Type}}; // {{.Comment}}
+{{end}}
+}
+{{end}}
