@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -22,13 +22,20 @@ type APIController struct {
 func (a *APIController) CreateAPI(ctx *app.Context) {
 	var param model.API
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create api params failed")
 		return
 	}
 	if err := a.APIService.CreateAPI(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create api failed")
 		return
 	}
+	ctx.Logger.Infow("api created",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"api_uuid", param.UUID,
+		"api_name", param.Name,
+	)
 	ctx.JSONSuccess(param)
 }
 
@@ -43,13 +50,20 @@ func (a *APIController) CreateAPI(ctx *app.Context) {
 func (a *APIController) UpdateAPI(ctx *app.Context) {
 	var param model.API
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind update api params failed")
 		return
 	}
 	if err := a.APIService.UpdateAPI(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "update api failed")
 		return
 	}
+	ctx.Logger.Infow("api updated",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"api_uuid", param.UUID,
+		"api_name", param.Name,
+	)
 	ctx.JSONSuccess(param)
 }
 
@@ -64,13 +78,19 @@ func (a *APIController) UpdateAPI(ctx *app.Context) {
 func (a *APIController) DeleteAPI(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete api params failed")
 		return
 	}
 	if err := a.APIService.DeleteAPI(ctx, param.Uuid); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "delete api failed", "uuid", param.Uuid)
 		return
 	}
+	ctx.Logger.Infow("api deleted",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"api_uuid", param.Uuid,
+	)
 	ctx.JSONSuccess("ok")
 }
 
@@ -85,12 +105,12 @@ func (a *APIController) DeleteAPI(ctx *app.Context) {
 func (a *APIController) GetAPIInfo(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind get api info params failed")
 		return
 	}
 	api, err := a.APIService.GetAPIByUUID(ctx, param.Uuid)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get api info failed", "uuid", param.Uuid)
 		return
 	}
 	ctx.JSONSuccess(api)
@@ -107,13 +127,13 @@ func (a *APIController) GetAPIInfo(ctx *app.Context) {
 func (a *APIController) GetAPIList(ctx *app.Context) {
 	param := &model.ReqAPIQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list api params failed")
 		return
 	}
 
 	apis, err := a.APIService.GetAPIList(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list apis failed")
 		return
 	}
 

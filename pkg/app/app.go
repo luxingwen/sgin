@@ -51,7 +51,15 @@ func NewApp() *App {
 		app.Redis = redisop.NewRedisClient(app.Config.RedisConfig.Address, app.Config.RedisConfig.Password, app.Config.RedisConfig.Database)
 	}
 
-	app.Router = gin.Default()
+	// 设置 gin 运行模式
+	if app.Config.LogConfig.Level == "debug" {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	// 使用自定义中间件栈，避免与 gin.Default() 的默认 Recovery/Logger 重复
+	app.Router = gin.New()
 
 	return app
 }

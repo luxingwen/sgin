@@ -111,7 +111,8 @@ func CustomRecoveryWithWriter(out io.Writer, handle RecoveryFunc) HandlerFunc {
 }
 
 func defaultHandleRecovery(c *Context, _ any) {
-	c.AbortWithStatus(http.StatusInternalServerError)
+	// 返回结构化JSON并携带真实HTTP状态码，便于前后端一致处理
+	c.JSONErrorWithStatus(http.StatusInternalServerError, http.StatusInternalServerError, "Internal Server Error")
 }
 
 // stack returns a nicely formatted stack frame, skipping skip frames.

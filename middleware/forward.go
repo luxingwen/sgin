@@ -5,6 +5,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 )
 
 // 根据前缀进行转发
@@ -22,10 +23,16 @@ func ForwardByPrefix(use ...app.HandlerFunc) app.HandlerFunc {
 					}
 				}
 				// 转发
-				remote, err := url.Parse(c.Config.ForwardAddress) //将此替换为你的目标URL
+				remote, err := url.Parse(c.Config.ForwardAddress)
 				if err != nil {
-					c.Logger.Error(err)
-					c.JSONError(http.StatusInternalServerError, "500 Internal Server Error")
+					c.JSONErrLog(ecode.InternalError("forward address invalid"), "parse forward address failed",
+						"trace_id", c.TraceID,
+						"path", c.FullPath(),
+						"method", c.Request.Method,
+						"client_ip", c.ClientIP(),
+						"forward_address", c.Config.ForwardAddress,
+						"cause", err.Error(),
+					)
 					return
 				}
 

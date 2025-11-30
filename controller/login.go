@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/pkg/utils"
 	"sgin/service"
 
@@ -26,27 +26,26 @@ type LoginController struct {
 func (c *LoginController) Login(ctx *app.Context) {
 	param := &model.ReqUserLogin{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind login params failed")
 		return
 	}
 
 	user, err := c.UserService.GetUserByUsernameOrEmail(ctx, param.Username)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
-
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get user by username failed", "username", param.Username)
 		c.CreateSysLoginLog(ctx, model.LoginStatusFail, param.Username, err.Error())
 		return
 	}
 
 	if utils.CheckPasswordHashWithSalt(param.Password, user.Password, ctx.Config.PasswdKey) == false {
-		ctx.JSONError(http.StatusBadRequest, "用户名或密码错误")
+		ctx.JSONErrLog(ecode.BadRequest("用户名或密码错误"), "password mismatch", "username", param.Username)
 		c.CreateSysLoginLog(ctx, model.LoginStatusFail, param.Username, "密码错误")
 		return
 	}
 
 	token, err := utils.GenerateToken(user.Uuid)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "generate token failed", "user_uuid", user.Uuid)
 		return
 	}
 

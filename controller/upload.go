@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"net/http"
 	"os"
 	"path/filepath"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"strings"
 
 	"github.com/google/uuid"
@@ -31,8 +31,7 @@ func (u *UploadController) UploadFile(ctx *app.Context) {
 	const maxUploadSize = 100 * 1024 * 1024 // 100 MB
 	err := ctx.Request.ParseMultipartForm(maxUploadSize)
 	if err != nil {
-		ctx.Logger.Error("上传文件失败:", err)
-		ctx.JSONError(http.StatusBadRequest, "超过最大上传限制")
+		ctx.JSONErrLog(ecode.BadRequest("超过最大上传限制"), "parse multipart form failed")
 		return
 	}
 
@@ -40,8 +39,7 @@ func (u *UploadController) UploadFile(ctx *app.Context) {
 
 	form, err := ctx.MultipartForm()
 	if err != nil {
-		ctx.Logger.Error("上传文件失败:", err)
-		ctx.JSONError(http.StatusBadRequest, "上传文件失败")
+		ctx.JSONErrLog(ecode.BadRequest("上传文件失败"), "get multipart form failed")
 		return
 	}
 
@@ -57,8 +55,7 @@ func (u *UploadController) UploadFile(ctx *app.Context) {
 			attatchment.Url = filename
 
 			if err := ctx.SaveUploadedFile(file, filepath.Join(ctx.Config.Upload.Dir, filename)); err != nil {
-				ctx.Logger.Error("上传文件失败:", err)
-				ctx.JSONError(http.StatusBadRequest, "上传文件失败")
+				ctx.JSONErrLog(ecode.BadRequest("上传文件失败"), "save uploaded file failed", "filename", filename)
 				return
 			}
 			fileattachments = append(fileattachments, attatchment)
@@ -89,21 +86,18 @@ func getFilePath(c *app.Context) (r string) {
 func (u *UploadController) DeleteFile(ctx *app.Context) {
 	var param model.ReqFileDeleteParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete file params failed")
 		return
 	}
 
 	err := os.Remove(ctx.Config.Upload.Dir + param.Filename)
 	if err != nil {
-		ctx.Logger.Error("删除文件失败:", err)
-
 		if os.IsNotExist(err) {
-			ctx.Logger.Error("文件不存在:", param.Filename)
+			ctx.Logger.Warnw("file not exist on delete", "filename", param.Filename)
 			ctx.JSONSuccess("删除文件成功")
 			return
 		}
-
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "remove file failed", "filename", param.Filename)
 		return
 	}
 

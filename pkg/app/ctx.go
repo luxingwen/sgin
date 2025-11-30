@@ -32,6 +32,9 @@ func (app *App) Wrap(hf HandlerFunc) gin.HandlerFunc {
 			traceID = uuid.New().String()
 		}
 
+		// ensure trace id is visible to clients
+		c.Writer.Header().Set("X-Trace-ID", traceID)
+
 		cc := &Context{
 			Context: c,
 			DB:      app.DB,
@@ -41,6 +44,7 @@ func (app *App) Wrap(hf HandlerFunc) gin.HandlerFunc {
 			),
 			Config:  app.Config,
 			TraceID: traceID,
+			Ctx:     c.Request.Context(),
 		}
 		hf(cc)
 	}

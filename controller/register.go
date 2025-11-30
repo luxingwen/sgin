@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/pkg/utils"
 	"sgin/service"
 
@@ -27,25 +27,25 @@ func (rc *RegisterController) Register(c *app.Context) {
 
 	params := &model.ReqRegisterParam{}
 	if err := c.ShouldBindJSON(params); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind register params failed")
 		return
 	}
 
 	// 验证验证码
 	ok, err := rc.VerificationCodeService.CheckVerificationCode(c, params.Code, params.Email, params.Phone)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "check verification code failed")
 		return
 	}
 
 	if ok == false {
-		c.JSONError(http.StatusBadRequest, "验证码错误")
+		c.JSONErrLog(ecode.BadRequest("验证码错误"), "verification code mismatch", "email", params.Email, "phone", params.Phone)
 		return
 	}
 	// 更新验证码状态
 	err = rc.VerificationCodeService.UpdateVerificationCode(c, params.Code, params.Email, params.Phone)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "update verification code failed")
 		return
 	}
 
@@ -60,7 +60,7 @@ func (rc *RegisterController) Register(c *app.Context) {
 
 	err = rc.UserService.CreateUser(c, &user)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "create user failed", "username", user.Username, "email", user.Email)
 		return
 	}
 

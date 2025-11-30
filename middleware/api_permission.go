@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -28,10 +28,26 @@ func ApiPermission() app.HandlerFunc {
 
 		appinfo0, ok := c.Get("app_info")
 		if !ok {
+			if apikey == "" {
+				c.JSONErrLog(ecode.Forbidden("missing api key"), "missing api key",
+					"trace_id", c.TraceID,
+					"path", c.FullPath(),
+					"method", apiMethod,
+					"client_ip", c.ClientIP(),
+				)
+				c.Abort()
+				return
+			}
 
 			appinfo, err = service.NewAppService().GetAppByApiKey(c, apikey)
 			if err != nil {
-				c.JSONError(http.StatusForbidden, err.Error())
+				c.JSONErrLog(ecode.Forbidden("invalid api key"), "get app by apikey failed",
+					"trace_id", c.TraceID,
+					"path", c.FullPath(),
+					"method", apiMethod,
+					"client_ip", c.ClientIP(),
+					"cause", err.Error(),
+				)
 				c.Abort()
 				return
 			}
@@ -43,7 +59,19 @@ func ApiPermission() app.HandlerFunc {
 
 		appPermission, err := service.NewAppPermissionService().GetAPIPermissionByNamePathMethod(c, appinfo.UUID, apiPath, apiMethod)
 		if err != nil || appPermission == nil {
-			c.JSONError(http.StatusForbidden, err.Error())
+			c.JSONErrLog(ecode.Forbidden("permission denied"), "api permission denied",
+				"trace_id", c.TraceID,
+				"path", c.FullPath(),
+				"method", apiMethod,
+				"client_ip", c.ClientIP(),
+				"app_id", appinfo.UUID,
+				"cause", func() string {
+					if err != nil {
+						return err.Error()
+					}
+					return ""
+				}(),
+			)
 			c.Abort()
 			return
 		}

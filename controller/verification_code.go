@@ -2,9 +2,9 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/pkg/mail"
 	"sgin/service"
 )
@@ -36,18 +36,18 @@ var registerMailContent = `
 func (v *VerificationCodeController) CreateVerificationCode(ctx *app.Context) {
 	param := &model.ReqVerificationCodeParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create verification code params failed")
 		return
 	}
 
 	if param.Email == "" && param.Phone == "" {
-		ctx.JSONError(http.StatusBadRequest, "邮箱和手机号码不能同时为空")
+		ctx.JSONErrLog(ecode.BadRequest("邮箱和手机号码不能同时为空"), "missing email and phone")
 		return
 	}
 
 	code, err := v.VerificationCodeService.CreateVerificationCode(ctx, param.Email, param.Phone)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create verification code failed")
 		return
 	}
 
@@ -64,7 +64,7 @@ func (v *VerificationCodeController) CreateVerificationCode(ctx *app.Context) {
 			Body:     fmt.Sprintf(registerMailContent, code),
 		})
 		if err != nil {
-			ctx.JSONError(http.StatusInternalServerError, err.Error())
+			ctx.JSONErrLog(ecode.InternalError(err.Error()), "send verification mail failed", "email", param.Email)
 			return
 		}
 	}
@@ -88,28 +88,28 @@ func (v *VerificationCodeController) CreateVerificationCode(ctx *app.Context) {
 func (v *VerificationCodeController) CheckVerificationCode(ctx *app.Context) {
 	param := &model.ReqVerificationCodeParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind check verification code params failed")
 		return
 	}
 
 	if param.Email == "" && param.Phone == "" {
-		ctx.JSONError(http.StatusBadRequest, "邮箱和手机号码不能同时为空")
+		ctx.JSONErrLog(ecode.BadRequest("邮箱和手机号码不能同时为空"), "missing email and phone")
 		return
 	}
 
 	if param.Code == "" {
-		ctx.JSONError(http.StatusBadRequest, "验证码不能为空")
+		ctx.JSONErrLog(ecode.BadRequest("验证码不能为空"), "code is empty")
 		return
 	}
 
 	ok, err := v.VerificationCodeService.CheckVerificationCode(ctx, param.Code, param.Email, param.Phone)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "check verification code failed")
 		return
 	}
 
 	if ok == false {
-		ctx.JSONError(http.StatusBadRequest, "验证码错误")
+		ctx.JSONErrLog(ecode.BadRequest("验证码错误"), "verification code mismatch")
 		return
 	}
 

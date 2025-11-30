@@ -43,3 +43,28 @@ sgin是基于gin框架的一层封装，集成了一些常用的业务组件，�
 
 - 生成swagger文档
 > swag init 
+
+### 运行与配置
+- 启动
+```powershell
+go build
+./sgin.exe
+```
+
+- 关键环境变量
+	- `SERVER_PORT`: 服务端口（如 8080）
+	- `LOG_FILE`: 日志文件路径，对应 `LogConfig.Filename`
+	- `MYSQL_HOST`/`MYSQL_PORT` 等：数据库连接
+	- `ALLOWED_ORIGINS`: 允许跨域来源，逗号分隔（如 `https://foo.com,https://bar.com`）
+	- `PASSWD_KEY`: 用于密码与 JWT 签名的密钥
+
+- 健康检查
+	- `GET /ping`: 基础存活检查
+	- `GET /healthz`: 应用健康检查
+	- `GET /readyz`: 就绪检查（会探测 DB/Redis 可用性）
+
+### 安全与稳定性
+- CORS: 增加白名单控制，仅回显允许的 `Origin`
+- 日志脱敏: MySQL 连接信息在日志中隐藏密码
+- 依赖更新: JWT 迁移到 `github.com/golang-jwt/jwt/v4`
+- 服务稳态: 配置了 HTTP `Read/Write/Idle` 超时，降低慢连接风险

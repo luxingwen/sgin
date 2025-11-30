@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -16,10 +17,18 @@ func AppKeyCheck() app.HandlerFunc {
 
 		appInfo, err := service.NewAppService().GetAppByApiKey(c, apikey)
 		if err != nil {
-			c.JSONError(403, err.Error())
+			c.JSONErrLog(ecode.Forbidden("invalid api key"), "get app by apikey failed",
+				"trace_id", c.TraceID,
+				"path", c.FullPath(),
+				"method", c.Request.Method,
+				"client_ip", c.ClientIP(),
+				"cause", err.Error(),
+			)
 			c.Abort()
 			return
 		}
 		c.Set("app_info", appInfo)
+		// 同步设置 app_id 方便后续限流等
+		c.Set("app_id", appInfo.UUID)
 	}
 }

@@ -1,15 +1,15 @@
 package routers
 
 import (
+	"net/http"
 	"sgin/controller"
+	"sgin/docs"
 	"sgin/middleware"
 	"sgin/pkg/app"
-
-	"io/ioutil"
-	"net/http"
 	"sgin/service"
+	swaggerassets "sgin/swagger"
 
-	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 )
 
 func InitRouter(ctx *app.App) {
@@ -85,6 +85,11 @@ func InitAppRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	v1.Use(middleware.LoginCheck())
 	v1.Use(middleware.SysOpLogMiddleware(&service.SysOpLogService{}))
+	// 每个 app_id 级别限流（配置化 r/b）
+	r := rate.Limit(ctx.Config.AppRateLimit.R)
+	b := ctx.Config.AppRateLimit.B
+	appLimiter := middleware.NewAppRateLimit(r, b)
+	v1.Use(appLimiter.HandleRateLimit())
 	{
 		appController := &controller.AppController{
 			AppService: &service.AppService{},
@@ -93,7 +98,6 @@ func InitAppRouter(ctx *app.App) {
 		v1.POST("/app/create", appController.CreateApp)
 		v1.POST("/app/update", appController.UpdateApp)
 		v1.POST("/app/delete", appController.DeleteApp)
-
 	}
 }
 
@@ -129,7 +133,6 @@ func InitLoginRouter(ctx *app.App) {
 	}
 }
 
-// 服务的路由
 func InitServerRouter(ctx *app.App) {
 	v1 := ctx.Group(ctx.Config.ApiPrefix + "/v1")
 	v1.Use(middleware.LoginCheck())
@@ -292,29 +295,17 @@ func InitMenuAPIRouter(ctx *app.App) {
 
 func InitSwaggerRouter(ctx *app.App) {
 	ctx.GET("/swagger/doc.json", func(c *app.Context) {
-		jsonFile, err := ioutil.ReadFile("./docs/swagger.json") // Replace with your actual json file path
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.Data(http.StatusOK, "application/json", jsonFile)
+		c.Header("Cache-Control", "public, max-age=3600")
+		c.Data(http.StatusOK, "application/json", docs.SwaggerJSON)
 	})
 
 	ctx.GET("/swagger/redoc.standalone.js", func(c *app.Context) {
-		b, err := ioutil.ReadFile("./swagger/redoc.standalone.js") // Replace with your actual json file path
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.Data(http.StatusOK, "text/html; charset=utf-8", b)
+		c.Header("Cache-Control", "public, max-age=3600")
+		c.Data(http.StatusOK, "application/javascript; charset=utf-8", swaggerassets.RedocJS)
 	})
 
 	ctx.GET("/swagger/index.html", func(c *app.Context) {
-		b, err := ioutil.ReadFile("./swagger/swagger.html") // Replace with your actual json file path
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.Data(http.StatusOK, "text/html; charset=utf-8", b)
+		c.Header("Cache-Control", "public, max-age=3600")
+		c.Data(http.StatusOK, "text/html; charset=utf-8", swaggerassets.SwaggerHTML)
 	})
 }

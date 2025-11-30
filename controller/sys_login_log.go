@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -45,11 +45,11 @@ func (l *SysLoginLogController) GetLoginLog(ctx *app.Context) {
 func (l *SysLoginLogController) UpdateLoginLog(ctx *app.Context) {
 	var param model.SysLoginLog
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind update login log params failed")
 		return
 	}
 	if err := l.LoginLogService.UpdateLoginLog(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "update login log failed")
 		return
 	}
 	ctx.JSONSuccess(param)
@@ -66,13 +66,13 @@ func (l *SysLoginLogController) UpdateLoginLog(ctx *app.Context) {
 func (l *SysLoginLogController) GetLoginLogList(ctx *app.Context) {
 	param := &model.ReqLoginLogQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list login logs params failed")
 		return
 	}
 
 	loginLogs, err := l.LoginLogService.GetLoginLogList(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list login logs failed")
 		return
 	}
 

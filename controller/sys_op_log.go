@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -22,11 +22,11 @@ type SysOpLogController struct {
 func (s *SysOpLogController) CreateSysOpLog(ctx *app.Context) {
 	var param model.SysOpLog
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create op log params failed")
 		return
 	}
 	if err := s.SysOpLogService.CreateSysOpLog(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create op log failed")
 		return
 	}
 	ctx.JSONSuccess(param)
@@ -43,11 +43,11 @@ func (s *SysOpLogController) CreateSysOpLog(ctx *app.Context) {
 func (s *SysOpLogController) UpdateSysOpLog(ctx *app.Context) {
 	var param model.SysOpLog
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind update op log params failed")
 		return
 	}
 	if err := s.SysOpLogService.UpdateSysOpLog(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "update op log failed")
 		return
 	}
 	ctx.JSONSuccess(param)
@@ -64,11 +64,11 @@ func (s *SysOpLogController) UpdateSysOpLog(ctx *app.Context) {
 func (s *SysOpLogController) DeleteSysOpLog(ctx *app.Context) {
 	var param model.ReqIdParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete op log params failed")
 		return
 	}
 	if err := s.SysOpLogService.DeleteSysOpLog(ctx, param.Id); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "delete op log failed", "id", param.Id)
 		return
 	}
 	ctx.JSONSuccess("ok")
@@ -85,12 +85,12 @@ func (s *SysOpLogController) DeleteSysOpLog(ctx *app.Context) {
 func (s *SysOpLogController) GetSysOpLogInfo(ctx *app.Context) {
 	var param model.ReqIdParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind get op log info params failed")
 		return
 	}
 	log, err := s.SysOpLogService.GetSysOpLogByID(ctx, param.Id)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get op log info failed", "id", param.Id)
 		return
 	}
 	ctx.JSONSuccess(log)
@@ -107,13 +107,13 @@ func (s *SysOpLogController) GetSysOpLogInfo(ctx *app.Context) {
 func (s *SysOpLogController) GetSysOpLogList(ctx *app.Context) {
 	param := &model.ReqOpLogQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list op logs params failed")
 		return
 	}
 
 	logs, err := s.SysOpLogService.GetSysOpLogList(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list op logs failed")
 		return
 	}
 

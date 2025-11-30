@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -22,7 +22,7 @@ type TeamMemberController struct {
 func (t *TeamMemberController) CreateTeamMember(ctx *app.Context) {
 	var param model.ReqTeamMemberCreateParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create team member params failed")
 		return
 	}
 
@@ -31,7 +31,7 @@ func (t *TeamMemberController) CreateTeamMember(ctx *app.Context) {
 		UserUUID: param.UserUUID,
 	}
 	if err := t.TeamMemberService.CreateTeamMember(ctx, teamMember); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create team member failed")
 		return
 	}
 	ctx.JSONSuccess(teamMember)
@@ -49,11 +49,11 @@ func (t *TeamMemberController) CreateTeamMember(ctx *app.Context) {
 func (t *TeamMemberController) DeleteTeamMember(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete team member params failed")
 		return
 	}
 	if err := t.TeamMemberService.DeleteTeamMember(ctx, param.Uuid); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "delete team member failed", "uuid", param.Uuid)
 		return
 	}
 	ctx.JSONSuccess("ok")
@@ -64,12 +64,12 @@ func (t *TeamMemberController) DeleteTeamMember(ctx *app.Context) {
 func (t *TeamMemberController) GetTeamMemberList(ctx *app.Context) {
 	var param model.ReqTeamMemberQueryParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list team member params failed")
 		return
 	}
 	teamMembers, err := t.TeamMemberService.GetTeamMemberUserList(ctx, &param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list team members failed")
 		return
 	}
 	ctx.JSONSuccess(teamMembers)

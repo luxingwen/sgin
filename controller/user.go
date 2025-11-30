@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"net/http"
 	"path/filepath"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -25,15 +25,22 @@ type UserController struct {
 func (uc *UserController) CreateUser(c *app.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind create user failed")
 		return
 	}
 
 	err := uc.Service.CreateUser(c, &user)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "create user failed", "username", user.Username, "email", user.Email)
 		return
 	}
+	c.Logger.Infow("user created",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"user_uuid", user.Uuid,
+		"username", user.Username,
+	)
 	c.JSONSuccess(user)
 }
 
@@ -49,13 +56,13 @@ func (uc *UserController) CreateUser(c *app.Context) {
 func (uc *UserController) GetUserByUUID(c *app.Context) {
 	param := &model.ReqUserQueryParam{}
 	if err := c.ShouldBindJSON(param); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind get user param failed")
 		return
 	}
 
 	user, err := uc.Service.GetUserByUUID(c, param.Uuid)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "get user by uuid failed", "uuid", param.Uuid)
 		return
 	}
 	c.JSONSuccess(user)
@@ -73,15 +80,21 @@ func (uc *UserController) GetUserByUUID(c *app.Context) {
 func (uc *UserController) UpdateUser(c *app.Context) {
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind update user failed")
 		return
 	}
 
 	err := uc.Service.UpdateUser(c, &user)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "update user failed", "uuid", user.Uuid)
 		return
 	}
+	c.Logger.Infow("user updated",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"user_uuid", user.Uuid,
+	)
 	c.JSONSuccess(user)
 }
 
@@ -97,20 +110,26 @@ func (uc *UserController) UpdateUser(c *app.Context) {
 func (uc *UserController) DeleteUser(c *app.Context) {
 	params := &model.ReqUserDeleteParam{}
 	if err := c.ShouldBindJSON(params); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete user failed")
 		return
 	}
 
 	if params.Uuid == c.GetString("user_id") {
-		c.JSONError(http.StatusBadRequest, "You can't delete yourself")
+		c.JSONErrLog(ecode.BadRequest("You can't delete yourself"), "self delete not allowed", "uuid", params.Uuid)
 		return
 	}
 
 	err := uc.Service.DeleteUser(c, params.Uuid)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "delete user failed", "uuid", params.Uuid)
 		return
 	}
+	c.Logger.Infow("user deleted",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"user_uuid", params.Uuid,
+	)
 	c.JSONSuccess("User deleted successfully")
 }
 
@@ -125,13 +144,13 @@ func (uc *UserController) DeleteUser(c *app.Context) {
 func (uc *UserController) GetUserList(c *app.Context) {
 	param := &model.ReqUserQueryParam{}
 	if err := c.ShouldBindJSON(param); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind list users param failed")
 		return
 	}
 
 	users, err := uc.Service.GetUserList(c, param)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "list users failed")
 		return
 	}
 
@@ -149,7 +168,7 @@ func (uc *UserController) GetMyInfo(c *app.Context) {
 	userId := c.GetString("user_id")
 	user, err := uc.Service.GetUserByUUID(c, userId)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErr(ecode.InternalError(err.Error()))
 		return
 	}
 	c.JSONSuccess(user)
@@ -166,7 +185,7 @@ func (uc *UserController) GetMyInfo(c *app.Context) {
 func (uc *UserController) UpdateAvatar(c *app.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "parse avatar file failed")
 		return
 	}
 
@@ -174,7 +193,7 @@ func (uc *UserController) UpdateAvatar(c *app.Context) {
 
 	userid := c.GetString("user_id")
 	if userid == "" {
-		c.JSONError(http.StatusBadRequest, "user_id is required")
+		c.JSONErrLog(ecode.BadRequest("user_id is required"), "missing user_id in context")
 		return
 	}
 
@@ -186,7 +205,7 @@ func (uc *UserController) UpdateAvatar(c *app.Context) {
 
 	err = c.SaveUploadedFile(file, c.Config.Upload.Dir+filename)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "save avatar failed")
 		return
 	}
 
@@ -197,9 +216,16 @@ func (uc *UserController) UpdateAvatar(c *app.Context) {
 
 	err = uc.Service.UpdateUser(c, &user)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "update user avatar failed", "uuid", userid)
 		return
 	}
+	c.Logger.Infow("user avatar updated",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"user_uuid", userid,
+		"avatar", filename,
+	)
 	c.JSONSuccess(user)
 }
 
@@ -208,7 +234,7 @@ func (uc *UserController) UpdateAvatar(c *app.Context) {
 func (uc *UserController) GetAllUsers(c *app.Context) {
 	users, err := uc.Service.GetAllUsers(c)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "get all users failed")
 		return
 	}
 	c.JSONSuccess(users)

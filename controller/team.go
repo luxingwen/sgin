@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -22,13 +22,20 @@ type TeamController struct {
 func (t *TeamController) CreateTeam(ctx *app.Context) {
 	var param model.Team
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create team params failed")
 		return
 	}
 	if err := t.TeamService.CreateTeam(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create team failed")
 		return
 	}
+	ctx.Logger.Infow("team created",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"team_uuid", param.UUID,
+		"team_name", param.Name,
+	)
 	ctx.JSONSuccess(param)
 }
 
@@ -43,13 +50,20 @@ func (t *TeamController) CreateTeam(ctx *app.Context) {
 func (t *TeamController) UpdateTeam(ctx *app.Context) {
 	var param model.Team
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind update team params failed")
 		return
 	}
 	if err := t.TeamService.UpdateTeam(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "update team failed")
 		return
 	}
+	ctx.Logger.Infow("team updated",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"team_uuid", param.UUID,
+		"team_name", param.Name,
+	)
 	ctx.JSONSuccess(param)
 }
 
@@ -64,13 +78,19 @@ func (t *TeamController) UpdateTeam(ctx *app.Context) {
 func (t *TeamController) DeleteTeam(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete team params failed")
 		return
 	}
 	if err := t.TeamService.DeleteTeam(ctx, param.Uuid); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "delete team failed", "uuid", param.Uuid)
 		return
 	}
+	ctx.Logger.Infow("team deleted",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"team_uuid", param.Uuid,
+	)
 	ctx.JSONSuccess("ok")
 }
 
@@ -85,12 +105,12 @@ func (t *TeamController) DeleteTeam(ctx *app.Context) {
 func (t *TeamController) GetTeamInfo(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind get team info params failed")
 		return
 	}
 	team, err := t.TeamService.GetTeamByUUID(ctx, param.Uuid)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get team info failed", "uuid", param.Uuid)
 		return
 	}
 	ctx.JSONSuccess(team)
@@ -107,13 +127,13 @@ func (t *TeamController) GetTeamInfo(ctx *app.Context) {
 func (t *TeamController) GetTeamList(ctx *app.Context) {
 	param := &model.ReqTeamQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list teams params failed")
 		return
 	}
 
 	teams, err := t.TeamService.GetTeamList(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list teams failed")
 		return
 	}
 

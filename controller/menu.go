@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -23,13 +23,13 @@ type MenuController struct {
 func (c *MenuController) GetMenuList(ctx *app.Context) {
 	param := &model.ReqMenuQueryParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list menu params failed")
 		return
 	}
 
 	menus, err := c.MenuService.GetMenuList(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list menus failed")
 		return
 	}
 
@@ -48,16 +48,22 @@ func (c *MenuController) GetMenuList(ctx *app.Context) {
 func (c *MenuController) CreateMenu(ctx *app.Context) {
 	param := &model.Menu{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create menu params failed")
 		return
 	}
 
 	err := c.MenuService.CreateMenu(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create menu failed")
 		return
 	}
-
+	ctx.Logger.Infow("menu created",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"menu_uuid", param.UUID,
+		"menu_name", param.Name,
+	)
 	ctx.JSONSuccess(param)
 }
 
@@ -73,16 +79,22 @@ func (c *MenuController) CreateMenu(ctx *app.Context) {
 func (c *MenuController) UpdateMenu(ctx *app.Context) {
 	param := &model.Menu{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind update menu params failed")
 		return
 	}
 
 	err := c.MenuService.UpdateMenu(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "update menu failed")
 		return
 	}
-
+	ctx.Logger.Infow("menu updated",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"menu_uuid", param.UUID,
+		"menu_name", param.Name,
+	)
 	ctx.JSONSuccess(param)
 }
 
@@ -98,28 +110,33 @@ func (c *MenuController) UpdateMenu(ctx *app.Context) {
 func (c *MenuController) DeleteMenu(ctx *app.Context) {
 	param := &model.ReqMenuDeleteParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete menu params failed")
 		return
 	}
 
 	err := c.MenuService.DeleteMenu(ctx, param.Uuid)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "delete menu failed", "uuid", param.Uuid)
 		return
 	}
-
+	ctx.Logger.Infow("menu deleted",
+		"path", ctx.FullPath(),
+		"method", ctx.Request.Method,
+		"client_ip", ctx.ClientIP(),
+		"menu_uuid", param.Uuid,
+	)
 	ctx.JSONSuccess("ok")
 }
 
 func (c *MenuController) GetMenuInfo(ctx *app.Context) {
 	param := &model.ReqUuidParam{}
 	if err := ctx.ShouldBindJSON(param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind get menu info params failed")
 		return
 	}
 	menu, err := c.MenuService.GetMenuByUUID(ctx, param.Uuid)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get menu info failed", "uuid", param.Uuid)
 		return
 	}
 	ctx.JSONSuccess(menu)

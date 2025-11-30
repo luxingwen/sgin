@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"bytes"
-	"io/ioutil"
-	"net/http"
+	"io"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 	"strings"
 	"time"
@@ -56,12 +56,18 @@ func SysOpLogMiddleware(logservice *service.SysOpLogService) app.HandlerFunc {
 			contentType := c.GetHeader("Content-Type")
 			if strings.HasPrefix(contentType, "application/json") {
 				// 读取请求体
-				bodyBytes, err = ioutil.ReadAll(c.Request.Body)
+				bodyBytes, err = io.ReadAll(c.Request.Body)
 				if err != nil {
-					c.JSONError(http.StatusBadRequest, "读取请求体失败")
+					c.JSONErrLog(ecode.BadRequest("读取请求体失败"), "read request body failed",
+						"trace_id", c.TraceID,
+						"path", c.FullPath(),
+						"method", c.Request.Method,
+						"client_ip", c.ClientIP(),
+						"cause", err.Error(),
+					)
 					return
 				}
-				c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+				c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 			}
 		}
 
@@ -95,7 +101,13 @@ func SysOpLogMiddleware(logservice *service.SysOpLogService) app.HandlerFunc {
 		// 将日志信息写入数据库
 		err = logservice.CreateSysOpLog(c, &logInfo)
 		if err != nil {
-			c.Logger.Error("Failed to create operation log", err)
+			c.Logger.Errorw("create sys op log failed",
+				"trace_id", c.TraceID,
+				"path", c.FullPath(),
+				"method", c.Request.Method,
+				"client_ip", c.ClientIP(),
+				"cause", err.Error(),
+			)
 			return
 		}
 	}

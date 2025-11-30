@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -22,11 +22,11 @@ type ServerController struct {
 func (s *ServerController) CreateServer(ctx *app.Context) {
 	var param model.Server
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind create server params failed")
 		return
 	}
 	if err := s.ServerService.CreateServer(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "create server failed")
 		return
 	}
 	ctx.JSONSuccess(param)
@@ -43,11 +43,11 @@ func (s *ServerController) CreateServer(ctx *app.Context) {
 func (s *ServerController) UpdateServer(ctx *app.Context) {
 	var param model.Server
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind update server params failed")
 		return
 	}
 	if err := s.ServerService.UpdateServer(ctx, &param); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "update server failed")
 		return
 	}
 	ctx.JSONSuccess(param)
@@ -64,11 +64,11 @@ func (s *ServerController) UpdateServer(ctx *app.Context) {
 func (s *ServerController) DeleteServer(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete server params failed")
 		return
 	}
 	if err := s.ServerService.DeleteServer(ctx, param.Uuid); err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "delete server failed", "uuid", param.Uuid)
 		return
 	}
 	ctx.JSONSuccess("ok")
@@ -85,12 +85,12 @@ func (s *ServerController) DeleteServer(ctx *app.Context) {
 func (s *ServerController) GetServerList(ctx *app.Context) {
 	var param model.ReqServerQueryParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind list server params failed")
 		return
 	}
 	r, err := s.ServerService.GetServerList(ctx, param)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "list servers failed")
 		return
 	}
 	ctx.JSONSuccess(r)
@@ -107,12 +107,12 @@ func (s *ServerController) GetServerList(ctx *app.Context) {
 func (s *ServerController) GetServerInfo(ctx *app.Context) {
 	var param model.ReqUuidParam
 	if err := ctx.ShouldBindJSON(&param); err != nil {
-		ctx.JSONError(http.StatusBadRequest, err.Error())
+		ctx.JSONErrLog(ecode.BadRequest(err.Error()), "bind get server info params failed")
 		return
 	}
 	r, err := s.ServerService.GetServerInfo(ctx, param.Uuid)
 	if err != nil {
-		ctx.JSONError(http.StatusInternalServerError, err.Error())
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get server info failed", "uuid", param.Uuid)
 		return
 	}
 	ctx.JSONSuccess(r)

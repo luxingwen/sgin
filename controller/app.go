@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"net/http"
 	"sgin/model"
 	"sgin/pkg/app"
+	"sgin/pkg/ecode"
 	"sgin/service"
 )
 
@@ -22,13 +22,13 @@ type AppController struct {
 func (ac *AppController) GetAppList(c *app.Context) {
 	param := &model.ReqAppQueryParam{}
 	if err := c.ShouldBindJSON(param); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind list app params failed")
 		return
 	}
 
 	user, err := ac.AppService.GetAppList(c, param)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "list apps failed")
 		return
 	}
 	c.JSONSuccess(user)
@@ -45,15 +45,22 @@ func (ac *AppController) GetAppList(c *app.Context) {
 func (ac *AppController) CreateApp(c *app.Context) {
 	var app model.App
 	if err := c.ShouldBindJSON(&app); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind create app params failed")
 		return
 	}
 
 	err := ac.AppService.CreateApp(c, &app)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "create app failed", "name", app.Name)
 		return
 	}
+	c.Logger.Infow("app created",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"app_uuid", app.UUID,
+		"app_name", app.Name,
+	)
 	c.JSONSuccess(app)
 }
 
@@ -68,15 +75,22 @@ func (ac *AppController) CreateApp(c *app.Context) {
 func (ac *AppController) UpdateApp(c *app.Context) {
 	var app model.App
 	if err := c.ShouldBindJSON(&app); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind update app params failed")
 		return
 	}
 
 	err := ac.AppService.UpdateApp(c, &app)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "update app failed", "uuid", app.UUID)
 		return
 	}
+	c.Logger.Infow("app updated",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"app_uuid", app.UUID,
+		"app_name", app.Name,
+	)
 	c.JSONSuccess(app)
 }
 
@@ -91,14 +105,20 @@ func (ac *AppController) UpdateApp(c *app.Context) {
 func (ac *AppController) DeleteApp(c *app.Context) {
 	var app model.ReqUuidParam
 	if err := c.ShouldBindJSON(&app); err != nil {
-		c.JSONError(http.StatusBadRequest, err.Error())
+		c.JSONErrLog(ecode.BadRequest(err.Error()), "bind delete app params failed")
 		return
 	}
 
 	err := ac.AppService.DeleteApp(c, app.Uuid)
 	if err != nil {
-		c.JSONError(http.StatusInternalServerError, err.Error())
+		c.JSONErrLog(ecode.InternalError(err.Error()), "delete app failed", "uuid", app.Uuid)
 		return
 	}
+	c.Logger.Infow("app deleted",
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+		"client_ip", c.ClientIP(),
+		"app_uuid", app.Uuid,
+	)
 	c.JSONSuccess("删除成功")
 }
