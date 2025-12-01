@@ -10,11 +10,11 @@ LogConfig:
   ResponseSize: 1000
   ShowConsole: true
 MySQL:
-  Host: "127.0.0.1"
+  Host: "192.168.1.12"
   Port: 3306
-  Username: "root"
-  Password: "root123"
-  Database: "sgin2"
+  Username: "sgin"
+  Password: "sginZzz@1"
+  Database: "sgin"
   ShowSQL: true
 
 MailConfig:
