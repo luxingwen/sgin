@@ -2,34 +2,64 @@ package routers
 
 import (
 	"net/http"
-	"sgin/controller"
-	"sgin/docs"
-	"sgin/middleware"
-	"sgin/pkg/app"
-	"sgin/service"
-	swaggerassets "sgin/swagger"
+
+	"github.com/luxingwen/sgin/controller"
+	"github.com/luxingwen/sgin/middleware"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/service"
+	swaggerassets "github.com/luxingwen/sgin/swagger"
 
 	"golang.org/x/time/rate"
 )
 
 func InitRouter(ctx *app.App) {
-	InitSwaggerRouter(ctx)
-	InitUserRouter(ctx)
-	InitMenuRouter(ctx)
-	InitAppRouter(ctx)
-	InitVerificationCodeRouter(ctx)
-	InitRegisterRouter(ctx)
-	InitLoginRouter(ctx)
-	InitServerRouter(ctx)
-	InitTeamRouter(ctx)
-	InitSysLoginLogRouter(ctx)
-	InitSysOpLogRouter(ctx)
-	InitSysApiRouter(ctx)
-	InitPermissionRouter(ctx)
-	InitPermissionMenuRouter(ctx)
-	InitPermissionUserRouter(ctx)
-	InitMenuAPIRouter(ctx)
-	InitTeamMemberRouter(ctx)
+	// Register all routers as a plugin so they are stored in App.Plugins and
+	// can be replayed into a host engine via RegisterIntoGinEngine.
+	ctx.RegisterPlugin(func(a *app.App) {
+		InitSwaggerRouter(a)
+		InitUserRouter(a)
+		InitMenuRouter(a)
+		InitAppRouter(a)
+		InitVerificationCodeRouter(a)
+		InitRegisterRouter(a)
+		InitLoginRouter(a)
+		InitServerRouter(a)
+		InitTeamRouter(a)
+		InitSysLoginLogRouter(a)
+		InitSysOpLogRouter(a)
+		InitSysApiRouter(a)
+		InitPermissionRouter(a)
+		InitPermissionMenuRouter(a)
+		InitPermissionUserRouter(a)
+		InitMenuAPIRouter(a)
+		InitTeamMemberRouter(a)
+	})
+}
+
+// InitRouterStored behaves like InitRouter but only stores the plugin
+// callbacks (does not invoke them). This is useful for embedding: the
+// host can later replay these callbacks into its own engine to avoid
+// double-registration on sgin's internal router.
+func InitRouterStored(ctx *app.App) {
+	ctx.StorePlugin(func(a *app.App) {
+		InitSwaggerRouter(a)
+		InitUserRouter(a)
+		InitMenuRouter(a)
+		InitAppRouter(a)
+		InitVerificationCodeRouter(a)
+		InitRegisterRouter(a)
+		InitLoginRouter(a)
+		InitServerRouter(a)
+		InitTeamRouter(a)
+		InitSysLoginLogRouter(a)
+		InitSysOpLogRouter(a)
+		InitSysApiRouter(a)
+		InitPermissionRouter(a)
+		InitPermissionMenuRouter(a)
+		InitPermissionUserRouter(a)
+		InitMenuAPIRouter(a)
+		InitTeamMemberRouter(a)
+	})
 }
 
 func InitUserRouter(ctx *app.App) {
@@ -294,10 +324,10 @@ func InitMenuAPIRouter(ctx *app.App) {
 }
 
 func InitSwaggerRouter(ctx *app.App) {
-	ctx.GET("/swagger/doc.json", func(c *app.Context) {
-		c.Header("Cache-Control", "public, max-age=3600")
-		c.Data(http.StatusOK, "application/json", docs.SwaggerJSON)
-	})
+	// ctx.GET("/swagger/doc.json", func(c *app.Context) {
+	// 	c.Header("Cache-Control", "public, max-age=3600")
+	// 	c.Data(http.StatusOK, "application/json", docs.SwaggerJSON)
+	// })
 
 	ctx.GET("/swagger/redoc.standalone.js", func(c *app.Context) {
 		c.Header("Cache-Control", "public, max-age=3600")

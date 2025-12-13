@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sgin/pkg/ecode"
+
+	"github.com/luxingwen/sgin/pkg/ecode"
 )
 
 type Response struct {

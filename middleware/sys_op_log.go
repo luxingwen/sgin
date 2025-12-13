@@ -3,12 +3,13 @@ package middleware
 import (
 	"bytes"
 	"io"
-	"sgin/model"
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
-	"sgin/service"
 	"strings"
 	"time"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
+	"github.com/luxingwen/sgin/service"
 )
 
 // 定义要过滤的路径

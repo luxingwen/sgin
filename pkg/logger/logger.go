@@ -2,8 +2,9 @@ package logger
 
 import (
 	"os"
-	"sgin/pkg/config"
 	"time"
+
+	"github.com/luxingwen/sgin/pkg/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -143,7 +144,7 @@ func NewLogger(cfg config.LogConfig) *Logger {
 
 	// 选择堆栈等级
 	var opts []zap.Option
-	opts = append(opts, zap.AddCaller())
+	opts = append(opts, zap.AddCaller(), zap.AddCallerSkip(1))
 	if stLevel, err := parseLevel(cfg.StacktraceLevel); err == nil {
 		opts = append(opts, zap.AddStacktrace(stLevel))
 	}

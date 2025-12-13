@@ -1,9 +1,10 @@
 package service
 
 import (
-	"sgin/model"
-	"sgin/pkg/app"
 	"time"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
 
 	"github.com/google/uuid"
 )

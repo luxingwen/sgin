@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
+
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
 )
 
 // 根据前缀进行转发

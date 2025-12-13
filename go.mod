@@ -1,4 +1,4 @@
-module sgin
+module github.com/luxingwen/sgin
 
 go 1.20
 
@@ -20,6 +20,8 @@ require (
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
 )
+
+replace github.com/luxingwen/sgin => .
 
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect

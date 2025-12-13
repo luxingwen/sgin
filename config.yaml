@@ -1,6 +1,6 @@
-ServerPort: "8081"
+ServerPort: "8085"
 LogConfig:
-  Level: "info"
+  Level: "debug"
   Format: "console"
   File: "app.log"
   MaxSize: 10

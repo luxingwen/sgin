@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"sgin/model"
-	"sgin/pkg/app"
-	"sgin/service"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

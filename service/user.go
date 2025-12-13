@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"sgin/model"
-	"sgin/pkg/app"
-	"sgin/pkg/utils"
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/utils"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

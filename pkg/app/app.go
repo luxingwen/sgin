@@ -1,10 +1,10 @@
 package app
 
 import (
-	"sgin/pkg/config"
-	"sgin/pkg/db"
-	"sgin/pkg/logger"
-	"sgin/pkg/redisop"
+	"github.com/luxingwen/sgin/pkg/config"
+	"github.com/luxingwen/sgin/pkg/db"
+	"github.com/luxingwen/sgin/pkg/logger"
+	"github.com/luxingwen/sgin/pkg/redisop"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -17,6 +17,29 @@ type App struct {
 	Logger *logger.Logger
 	Config *config.Config
 	Router *gin.Engine
+	// Plugins stores registered plugin callbacks so they can be replayed
+	// into a different router (useful for embedding into a host engine).
+	Plugins []func(*App)
+}
+
+// RegisterPlugin 允许宿主或外部模块以回调方式注册路由/中间件等
+func (a *App) RegisterPlugin(fn func(*App)) {
+	if fn == nil {
+		return
+	}
+	// store plugin for later replay and invoke immediately for existing behavior
+	a.Plugins = append(a.Plugins, fn)
+	fn(a)
+}
+
+// StorePlugin stores a plugin callback without invoking it. This is useful
+// for embedding scenarios where the host wants to replay registered plugins
+// into its own router instead of immediately applying them to `a.Router`.
+func (a *App) StorePlugin(fn func(*App)) {
+	if fn == nil {
+		return
+	}
+	a.Plugins = append(a.Plugins, fn)
 }
 
 type AppRouterGroup struct {
@@ -25,43 +48,59 @@ type AppRouterGroup struct {
 }
 
 func NewApp() *App {
-	app := &App{}
-	app.Config = config.GetConfig()
-	if app.Config.MySQL.Host != "" {
-		app.DB = db.GetDB(app.Config.MySQL)
+	return NewAppFromConfig(config.GetConfig())
+}
+
+// NewAppFromConfig creates an App using the provided Config. This is useful
+// when the host application already has its own configuration and does not
+// want sgin to call InitConfig/read files itself.
+func NewAppFromConfig(cfg *config.Config) *App {
+	a := &App{}
+	a.Config = cfg
+	if a.Config == nil {
+		// caller likely forgot to init config; fall back to default behavior
+		a.Config = config.GetConfig()
 	}
 
-	app.Logger = logger.NewLogger(app.Config.LogConfig)
+	if a.Config.MySQL.Host != "" {
+		a.DB = db.GetDB(a.Config.MySQL)
+	}
 
-	if app.Config.MySQL.ShowSQL && app.DB != nil {
+	a.Logger = logger.NewLogger(a.Config.LogConfig)
 
+	if a.Config.MySQL.ShowSQL && a.DB != nil {
 		gormLogger := glogger.New(
-			app.Logger,
+			a.Logger,
 			glogger.Config{
 				LogLevel:                  glogger.Info,
-				IgnoreRecordNotFoundError: true, // 忽略记录未找到的错误
-				Colorful:                  true, // 使用彩色输出
+				IgnoreRecordNotFoundError: true,
+				Colorful:                  true,
 			},
 		)
-
-		app.DB.Logger = gormLogger
+		a.DB.Logger = gormLogger
 	}
 
-	if app.Config.RedisConfig.Address != "" {
-		app.Redis = redisop.NewRedisClient(app.Config.RedisConfig.Address, app.Config.RedisConfig.Password, app.Config.RedisConfig.Database)
+	if a.Config.RedisConfig.Address != "" {
+		a.Redis = redisop.NewRedisClient(a.Config.RedisConfig.Address, a.Config.RedisConfig.Password, a.Config.RedisConfig.Database)
 	}
 
-	// 设置 gin 运行模式
-	if app.Config.LogConfig.Level == "debug" {
+	if a.Config.LogConfig.Level == "debug" {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// 使用自定义中间件栈，避免与 gin.Default() 的默认 Recovery/Logger 重复
-	app.Router = gin.New()
+	a.Router = gin.New()
 
-	return app
+	return a
+}
+
+// NewAppFromConfigPath loads configuration from the given file path and
+// returns a newly constructed *App. This is useful when a host wants to
+// provide a specific config file path without manipulating env vars.
+func NewAppFromConfigPath(path string) *App {
+	config.InitConfigWithFile(path)
+	return NewAppFromConfig(config.GetConfig())
 }
 
 func (app *App) Group(relativePath string, handlers ...gin.HandlerFunc) *AppRouterGroup {

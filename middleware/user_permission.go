@@ -1,6 +1,6 @@
 package middleware
 
-import "sgin/pkg/app"
+import "github.com/luxingwen/sgin/pkg/app"
 
 // 用户权限中间件
 

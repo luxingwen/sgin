@@ -2,11 +2,12 @@ package controller
 
 import (
 	"fmt"
-	"sgin/model"
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
-	"sgin/pkg/mail"
-	"sgin/service"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
+	"github.com/luxingwen/sgin/pkg/mail"
+	"github.com/luxingwen/sgin/service"
 )
 
 type VerificationCodeController struct {

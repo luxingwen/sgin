@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"sgin/pkg/app"
-	"sgin/service"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/service"
 )
 
 type ApiPermissionController struct {

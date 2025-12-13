@@ -3,10 +3,11 @@ package controller
 import (
 	"os"
 	"path/filepath"
-	"sgin/model"
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
 	"strings"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
 
 	"github.com/google/uuid"
 )

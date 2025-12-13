@@ -2,9 +2,10 @@ package service
 
 import (
 	"errors"
-	"sgin/model"
-	"sgin/pkg/app"
 	"time"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
 )
 
 type LogService struct {

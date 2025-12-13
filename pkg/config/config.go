@@ -107,6 +107,19 @@ func InitConfig() {
 	loadConfigFile()
 }
 
+// InitConfigWithFile sets the CONFIG_FILE environment variable and then
+// initializes configuration. This is a convenience helper for callers who
+// want to provide an explicit config file path.
+func InitConfigWithFile(path string) {
+	if path == "" {
+		InitConfig()
+		return
+	}
+	os.Setenv("CONFIG_FILE", path)
+	bindEnvs()
+	loadConfigFile()
+}
+
 func loadConfigFile() {
 	v := viper.New()
 

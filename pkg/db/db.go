@@ -3,8 +3,9 @@ package db
 import (
 	"fmt"
 	"log"
-	"sgin/pkg/config"
 	"time"
+
+	"github.com/luxingwen/sgin/pkg/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

@@ -5,7 +5,7 @@ package auth
 import (
 	"net/http"
 
-	"sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/app"
 
 	"github.com/casbin/casbin/v2"
 )

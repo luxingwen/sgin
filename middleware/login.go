@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
-	"sgin/pkg/utils"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
+	"github.com/luxingwen/sgin/pkg/utils"
 )
 
 // 登录中间件

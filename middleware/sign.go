@@ -3,10 +3,11 @@ package middleware
 import (
 	"bytes"
 	"io"
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
-	"sgin/pkg/utils"
-	"sgin/service"
+
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
+	"github.com/luxingwen/sgin/pkg/utils"
+	"github.com/luxingwen/sgin/service"
 )
 
 const maxSignBodyBytes = 1 << 20 // 1MB

@@ -2,10 +2,11 @@ package service
 
 import (
 	"errors"
-	"sgin/model"
-	"sgin/pkg/app"
-	"sgin/pkg/utils"
 	"time"
+
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/utils"
 
 	"github.com/google/uuid"
 )

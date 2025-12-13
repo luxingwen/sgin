@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
-	"sgin/service"
+	"github.com/luxingwen/sgin/pkg/app"
+	"github.com/luxingwen/sgin/pkg/ecode"
+	"github.com/luxingwen/sgin/service"
 )
 
 // app中间件，检查app的key是否有效

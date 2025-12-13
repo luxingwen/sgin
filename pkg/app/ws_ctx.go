@@ -1,9 +1,9 @@
 package app
 
 import (
-	"sgin/pkg/config"
-	"sgin/pkg/logger"
-	"sgin/pkg/redisop"
+	"github.com/luxingwen/sgin/pkg/config"
+	"github.com/luxingwen/sgin/pkg/logger"
+	"github.com/luxingwen/sgin/pkg/redisop"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"

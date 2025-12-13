@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"sgin/model"
-	"sgin/pkg/app"
+	"github.com/luxingwen/sgin/model"
+	"github.com/luxingwen/sgin/pkg/app"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

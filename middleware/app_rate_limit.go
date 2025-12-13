@@ -1,9 +1,11 @@
 package middleware
 
 import (
-	"sgin/pkg/app"
-	"sgin/pkg/ecode"
 	"sync"
+
+	"github.com/luxingwen/sgin/pkg/ecode"
+
+	"github.com/luxingwen/sgin/pkg/app"
 
 	"golang.org/x/time/rate"
 )

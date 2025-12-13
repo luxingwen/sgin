@@ -68,3 +68,31 @@ go build
 - 日志脱敏: MySQL 连接信息在日志中隐藏密码
 - 依赖更新: JWT 迁移到 `github.com/golang-jwt/jwt/v4`
 - 服务稳态: 配置了 HTTP `Read/Write/Idle` 超时，降低慢连接风险
+
+### 作为库使用（嵌入式接入）
+
+你可以把 `sgin` 当作一个可复用的库，在宿主项目中创建 `App`，并以插件化方式注入路由/中间件：
+
+示例（在宿主项目中）:
+
+```go
+import (
+	"github.com/luxingwen/sgin"
+	"github.com/luxingwen/sgin/pkg/app"
+)
+
+func main() {
+	a := sgin.NewApp()
+	// 插件式注册
+	sgin.RegisterPlugin(a, func(a *app.App) {
+		a.GET("/hello", func(ctx *app.Context) { ctx.JSONSuccess("hello") })
+	})
+	// 启动（会阻塞直到收到停止信号）
+	_ = sgin.Start(a, "")
+}
+```
+
+开发提示:
+- `sgin.RegisterPlugin` 和 `app.App.RegisterPlugin` 都可以用来注入路由或中间件。
+- 如果你想在非 HTTP 场景使用部分功能，可以使用 `pkg/app` 中的 `AppContext` 与 `NewBackgroundContext`。
+

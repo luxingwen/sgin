@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"sgin/pkg/config"
+	"github.com/luxingwen/sgin/pkg/config"
 
 	jwt "github.com/golang-jwt/jwt/v4"
 )
