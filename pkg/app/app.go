@@ -6,6 +6,8 @@ import (
 	"github.com/luxingwen/sgin/pkg/logger"
 	"github.com/luxingwen/sgin/pkg/redisop"
 
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	glogger "gorm.io/gorm/logger"
@@ -20,6 +22,8 @@ type App struct {
 	// Plugins stores registered plugin callbacks so they can be replayed
 	// into a different router (useful for embedding into a host engine).
 	Plugins []func(*App)
+	// Extras holds decoded custom configuration structures keyed by caller-provided name
+	Extras map[string]interface{}
 }
 
 // RegisterPlugin 允许宿主或外部模块以回调方式注册路由/中间件等
@@ -42,6 +46,46 @@ func (a *App) StorePlugin(fn func(*App)) {
 	a.Plugins = append(a.Plugins, fn)
 }
 
+// GetExtra returns the extra object registered under name, if any.
+func (a *App) GetExtra(name string) (interface{}, bool) {
+	if a == nil || a.Extras == nil {
+		return nil, false
+	}
+	v, ok := a.Extras[name]
+	return v, ok
+}
+
+// GetExtraAs attempts to return the extra stored under name as type T.
+// It supports values stored as either T or *T; when stored as *T and T is
+// a non-pointer type, the pointed value will be returned.
+func GetExtraAs[T any](a *App, name string) (T, bool) {
+	var zero T
+	if a == nil {
+		return zero, false
+	}
+	v, ok := a.GetExtra(name)
+	if !ok {
+		return zero, false
+	}
+	// direct assertion
+	if val, ok := v.(T); ok {
+		return val, true
+	}
+	// if v is a pointer to T, dereference and try
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr && rv.IsValid() {
+		ev := rv.Elem()
+		if ev.IsValid() {
+			if iface := ev.Interface(); iface != nil {
+				if val, ok := iface.(T); ok {
+					return val, true
+				}
+			}
+		}
+	}
+	return zero, false
+}
+
 type AppRouterGroup struct {
 	*gin.RouterGroup
 	App *App
@@ -49,6 +93,35 @@ type AppRouterGroup struct {
 
 func NewApp() *App {
 	return NewAppFromConfig(config.GetConfig())
+}
+
+// AppOption allows callers to customize App during initialization.
+type AppOption func(*App)
+
+// WithExtra decodes configuration key into the provided out pointer and stores it
+// in App.Extras under the provided name. Example:
+//
+//	app.NewAppWithOptions(app.WithExtra("my_extra", "my_extra", &MyExtra{}))
+func WithExtra(name string, key string, out interface{}) AppOption {
+	return func(a *App) {
+		// best-effort: try to unmarshal the key into out; ignore error here
+		_ = config.UnmarshalKey(key, out)
+		if a.Extras == nil {
+			a.Extras = make(map[string]interface{})
+		}
+		a.Extras[name] = out
+	}
+}
+
+// NewAppWithOptions creates a new App and applies the provided options.
+func NewAppWithOptions(opts ...AppOption) *App {
+	a := NewApp()
+	for _, o := range opts {
+		if o != nil {
+			o(a)
+		}
+	}
+	return a
 }
 
 // NewAppFromConfig creates an App using the provided Config. This is useful

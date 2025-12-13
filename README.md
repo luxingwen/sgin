@@ -64,10 +64,73 @@ go build
 	- `GET /readyz`: 就绪检查（会探测 DB/Redis 可用性）
 
 ### 安全与稳定性
-- CORS: 增加白名单控制，仅回显允许的 `Origin`
-- 日志脱敏: MySQL 连接信息在日志中隐藏密码
-- 依赖更新: JWT 迁移到 `github.com/golang-jwt/jwt/v4`
-- 服务稳态: 配置了 HTTP `Read/Write/Idle` 超时，降低慢连接风险
+### 扩展配置（插件式）
+
+如果你把 `sgin` 作为一个库嵌入到你的应用中，可以按插件式方式扩展配置与运行时行为。本仓库提供了两类机制：
+
+- `config.RegisterExtension(name, fn, strict)`：插件在自己的 `init()` 中注册一个回调，框架在加载主配置后（`config.InitConfig`）会依次调用这些回调，回调负责从底层 viper 中解码自己的配置段并做轻量初始化；当 `strict=true` 时，回调失败会导致启动失败（fail-fast）。
+- `app.WithExtra(name, key, out)` / `NewAppWithOptions`：在创建 `App` 时将已解码的自定义结构注入 `App.Extras`，运行时可以通过 `App.GetExtra(name)` 或泛型 `GetExtraAs[T]` 安全取回具体类型。
+
+示例代码与运行方式（仓库中包含两个示例）：
+
+1) 插件式示例 — `examples/plugin_demo`
+
+插件在 `examples/plugin_demo/plugin/plugin.go` 中：
+
+```go
+func init() {
+	config.RegisterExtension("myplugin", func(v *viper.Viper, cfg *config.Config) error {
+		var c MyExtra
+		if err := v.UnmarshalKey("myplugin", &c); err != nil {
+			return err
+		}
+		// 保存到插件包内的全局变量，或做轻量初始化
+		Conf = &c
+		return nil
+	}, false)
+}
+```
+
+主程序通过 `plugin.Setup(a)` 在 App 创建后注册路由：
+
+```go
+a := app.NewAppFromConfig(config.GetConfig())
+plugin.Setup(a)
+```
+
+运行示例：
+```powershell
+go run ./examples/plugin_demo
+```
+
+访问： `http://localhost:8080/plugin/hello`（若配置 `feature_flag: true`）
+
+2) `WithExtra` 示例 — `examples/withextra`
+
+方式 A（手动解码并注入）：
+```go
+var extra MyExtra
+_ = config.UnmarshalKey("my_extra2", &extra)
+a := app.NewAppWithOptions(app.WithExtra("manual_extra", "my_extra2", &extra))
+```
+
+方式 B（直接把指针传入让 `WithExtra` 内部解码）：
+```go
+a := app.NewAppWithOptions(app.WithExtra("auto_extra", "my_extra2", &MyExtra{}))
+```
+
+运行示例：
+```powershell
+go run ./examples/withextra
+```
+
+注意与最佳实践：
+- 推荐在启动阶段（`main`）显式使用 `config.UnmarshalKey` 解码并校验扩展配置，然后把已解析的结构注入 `App`（更类型安全、可控）。
+- `RegisterExtension` 适合插件/第三方包在 `init()` 中声明自己的配置解析逻辑；若插件需要在 App 生命周期注册路由或中间件，请同时使用 `app.RegisterPlugin` 或在 `App` 初始化后调用插件的 `Setup(a *app.App)`。
+- 插件回调应尽量保持轻量（仅解析配置或构造轻量对象）；重型阻塞初始化建议放在 `app.RegisterPlugin` 的回调中运行时完成。
+
+如果需要，我可以将以上示例运行说明合并到 README 的更醒目位置，或添加一个 `Makefile` / PowerShell 脚本以便一键运行示例。
+
 
 ### 作为库使用（嵌入式接入）
 

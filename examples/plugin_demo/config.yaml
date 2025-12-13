@@ -1,0 +1,3 @@
+myplugin:
+  feature_flag: true
+  limit: 10

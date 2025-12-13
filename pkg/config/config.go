@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 	"strings"
@@ -100,6 +101,12 @@ type RateLimitConfig struct {
 
 var (
 	config *Config
+	v      *viper.Viper
+	// extensions holds registered config extension callbacks
+	extensions = make(map[string]struct {
+		fn     func(v *viper.Viper, cfg *Config) error
+		strict bool
+	})
 )
 
 func InitConfig() {
@@ -121,7 +128,7 @@ func InitConfigWithFile(path string) {
 }
 
 func loadConfigFile() {
-	v := viper.New()
+	v = viper.New()
 
 	configFile := os.Getenv("CONFIG_FILE")
 	if configFile == "" {
@@ -165,6 +172,34 @@ func loadConfigFile() {
 	if err := config.Validate(); err != nil {
 		log.Fatalf("invalid configuration: %v", err)
 	}
+
+	// 执行已注册的扩展回调（插件式解析）
+	for name, ext := range extensions {
+		if ext.fn == nil {
+			continue
+		}
+		if err := ext.fn(v, config); err != nil {
+			if ext.strict {
+				log.Fatalf("extension %s init failed: %v", name, err)
+			} else {
+				log.Printf("warning: extension %s init failed: %v", name, err)
+			}
+		}
+	}
+}
+
+// RegisterExtension allows external packages to register a callback that will be
+// executed after the main configuration file is loaded. The callback receives the
+// underlying *viper.Viper and the decoded *Config. If strict is true, a non-nil
+// error returned from the callback will cause application startup to fail.
+func RegisterExtension(name string, fn func(v *viper.Viper, cfg *Config) error, strict bool) {
+	if name == "" || fn == nil {
+		return
+	}
+	extensions[name] = struct {
+		fn     func(v *viper.Viper, cfg *Config) error
+		strict bool
+	}{fn: fn, strict: strict}
 }
 
 func bindEnvs() {
@@ -234,4 +269,18 @@ func (c *Config) Validate() error {
 
 func GetConfig() *Config {
 	return config
+}
+
+// UnmarshalKey decodes a specific key from the underlying viper into out.
+// Returns an error if config hasn't been initialized.
+func UnmarshalKey(key string, out interface{}) error {
+	if v == nil {
+		return errors.New("config not initialized")
+	}
+	return v.UnmarshalKey(key, out)
+}
+
+// Raw returns the underlying viper instance (read-only use recommended).
+func Raw() *viper.Viper {
+	return v
 }
