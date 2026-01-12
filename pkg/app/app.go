@@ -19,6 +19,8 @@ type App struct {
 	Logger *logger.Logger
 	Config *config.Config
 	Router *gin.Engine
+	// BasePath is an optional prefix automatically added to all routes registered via App methods
+	BasePath string
 	// Plugins stores registered plugin callbacks so they can be replayed
 	// into a different router (useful for embedding into a host engine).
 	Plugins []func(*App)
@@ -178,7 +180,7 @@ func NewAppFromConfigPath(path string) *App {
 
 func (app *App) Group(relativePath string, handlers ...gin.HandlerFunc) *AppRouterGroup {
 	return &AppRouterGroup{
-		RouterGroup: app.Router.Group(relativePath, handlers...),
+		RouterGroup: app.Router.Group(app.addBase(relativePath), handlers...),
 		App:         app,
 	}
 }
@@ -190,23 +192,23 @@ func (app *App) Use(handlers ...HandlerFunc) {
 }
 
 func (app *App) GET(relativePath string, hf HandlerFunc) {
-	app.Router.GET(relativePath, app.Wrap(hf))
+	app.Router.GET(app.addBase(relativePath), app.Wrap(hf))
 }
 
 func (app *App) POST(relativePath string, hf HandlerFunc) {
-	app.Router.POST(relativePath, app.Wrap(hf))
+	app.Router.POST(app.addBase(relativePath), app.Wrap(hf))
 }
 
 func (app *App) PUT(relativePath string, hf HandlerFunc) {
-	app.Router.PUT(relativePath, app.Wrap(hf))
+	app.Router.PUT(app.addBase(relativePath), app.Wrap(hf))
 }
 
 func (app *App) DELETE(relativePath string, hf HandlerFunc) {
-	app.Router.DELETE(relativePath, app.Wrap(hf))
+	app.Router.DELETE(app.addBase(relativePath), app.Wrap(hf))
 }
 
 func (app *App) PATCH(relativePath string, hf HandlerFunc) {
-	app.Router.PATCH(relativePath, app.Wrap(hf))
+	app.Router.PATCH(app.addBase(relativePath), app.Wrap(hf))
 }
 
 func (app *App) NoRoute(hf HandlerFunc) {
@@ -244,6 +246,36 @@ func (rg *AppRouterGroup) Use(handlers ...HandlerFunc) {
 	for _, hf := range handlers {
 		rg.RouterGroup.Use(rg.App.Wrap(hf))
 	}
+}
+
+// SetBasePath sets a prefix applied to all routes registered on App (and App.Group).
+// Prefix should start with "/"; trailing slashes are trimmed to avoid double slashes.
+func (app *App) SetBasePath(prefix string) {
+	if prefix == "" || prefix == "/" {
+		app.BasePath = ""
+		return
+	}
+	// normalize to "/something" without trailing slash
+	if prefix[0] != '/' {
+		prefix = "/" + prefix
+	}
+	// trim trailing slash except root
+	for len(prefix) > 1 && prefix[len(prefix)-1] == '/' {
+		prefix = prefix[:len(prefix)-1]
+	}
+	app.BasePath = prefix
+}
+
+// addBase prefixes path with BasePath when configured.
+func (app *App) addBase(relativePath string) string {
+	if app == nil || app.BasePath == "" {
+		return relativePath
+	}
+	// ensure relativePath starts with "/"
+	if relativePath == "" || relativePath[0] != '/' {
+		relativePath = "/" + relativePath
+	}
+	return app.BasePath + relativePath
 }
 
 // Similarly, define other HTTP method handlers like POST, PUT, DELETE...
