@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -76,12 +77,22 @@ func ParseTokenGetUserID(tokenString string) (string, error) {
 		return "", err
 	}
 
-	userID, ok := claims["user_id"].(string)
-	if !ok {
-		return "", err
+	switch v := claims["user_id"].(type) {
+	case string:
+		return v, nil
+	case float64:
+		return fmt.Sprintf("%d", uint64(v)), nil
+	case int:
+		return fmt.Sprintf("%d", v), nil
+	case int64:
+		return fmt.Sprintf("%d", v), nil
+	case uint:
+		return fmt.Sprintf("%d", v), nil
+	case uint64:
+		return fmt.Sprintf("%d", v), nil
+	default:
+		return "", errors.New("invalid user_id in token")
 	}
-
-	return userID, nil
 }
 
 // 生成验证码

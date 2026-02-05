@@ -6,6 +6,7 @@ import (
 	"github.com/luxingwen/sgin/pkg/logger"
 	"github.com/luxingwen/sgin/pkg/redisop"
 
+	"net/http"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -215,6 +216,21 @@ func (app *App) NoRoute(hf HandlerFunc) {
 	app.Router.NoRoute(app.Wrap(hf))
 }
 
+// Static 在指定相对路径处提供静态文件
+func (app *App) Static(relativePath string, root string) {
+	app.Router.Static(app.addBase(relativePath), root)
+}
+
+// StaticFS 在指定相对路径处提供来自http.FileSystem的静态文件
+func (app *App) StaticFS(relativePath string, fs http.FileSystem) {
+	app.Router.StaticFS(app.addBase(relativePath), fs)
+}
+
+// StaticFile 在指定相对路径处提供单个静态文件
+func (app *App) StaticFile(relativePath string, filePath string) {
+	app.Router.StaticFile(app.addBase(relativePath), filePath)
+}
+
 func (rg *AppRouterGroup) GET(relativePath string, hf HandlerFunc) {
 	rg.RouterGroup.GET(relativePath, rg.App.Wrap(hf))
 }
@@ -246,6 +262,21 @@ func (rg *AppRouterGroup) Use(handlers ...HandlerFunc) {
 	for _, hf := range handlers {
 		rg.RouterGroup.Use(rg.App.Wrap(hf))
 	}
+}
+
+// Static 在指定相对路径处提供静态文件
+func (rg *AppRouterGroup) Static(relativePath string, root string) {
+	rg.RouterGroup.Static(relativePath, root)
+}
+
+// StaticFS 在指定相对路径处提供来自http.FileSystem的静态文件
+func (rg *AppRouterGroup) StaticFS(relativePath string, fs http.FileSystem) {
+	rg.RouterGroup.StaticFS(relativePath, fs)
+}
+
+// StaticFile 在指定相对路径处提供单个静态文件
+func (rg *AppRouterGroup) StaticFile(relativePath string, filePath string) {
+	rg.RouterGroup.StaticFile(relativePath, filePath)
 }
 
 // SetBasePath sets a prefix applied to all routes registered on App (and App.Group).

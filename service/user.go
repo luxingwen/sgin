@@ -30,7 +30,13 @@ func (s *UserService) CreateUser(ctx *app.Context, user *model.User) error {
 		user.Password = "123456"
 	}
 
-	user.Password = utils.HashPasswordWithSalt(user.Password, ctx.Config.PasswdKey)
+	// 获取密码加密密钥，如果为空则使用默认值（与登录验证保持一致）
+	passwdKey := ctx.Config.PasswdKey
+	if passwdKey == "" {
+		passwdKey = "default-secret-key"
+	}
+
+	user.Password = utils.HashPasswordWithSalt(user.Password, passwdKey)
 
 	err := ctx.DB.Create(user).Error
 	if err != nil {
@@ -65,7 +71,12 @@ func (s *UserService) UpdateUser(ctx *app.Context, user *model.User) error {
 	user.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 
 	if user.Password != "" {
-		user.Password = utils.HashPasswordWithSalt(user.Password, ctx.Config.PasswdKey)
+		// 获取密码加密密钥，如果为空则使用默认值（与登录验证保持一致）
+		passwdKey := ctx.Config.PasswdKey
+		if passwdKey == "" {
+			passwdKey = "default-secret-key"
+		}
+		user.Password = utils.HashPasswordWithSalt(user.Password, passwdKey)
 	}
 
 	err := ctx.DB.Where("uuid = ?", user.Uuid).Updates(user).Error

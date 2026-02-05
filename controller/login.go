@@ -32,12 +32,22 @@ func (c *LoginController) Login(ctx *app.Context) {
 
 	user, err := c.UserService.GetUserByUsernameOrEmail(ctx, param.Username)
 	if err != nil {
-		ctx.JSONErrLog(ecode.InternalError(err.Error()), "get user by username failed", "username", param.Username)
+		if err.Error() == "user not found" {
+			ctx.JSONErrLog(ecode.BadRequest("用户名或密码错误"), "user not found", "username", param.Username)
+		} else {
+			ctx.JSONErrLog(ecode.InternalError(err.Error()), "get user by username failed", "username", param.Username)
+		}
 		c.CreateSysLoginLog(ctx, model.LoginStatusFail, param.Username, err.Error())
 		return
 	}
 
-	if utils.CheckPasswordHashWithSalt(param.Password, user.Password, ctx.Config.PasswdKey) == false {
+	// 获取密码加密密钥，如果为空则使用默认值（与创建用户时保持一致）
+	passwdKey := ctx.Config.PasswdKey
+	if passwdKey == "" {
+		passwdKey = "default-secret-key"
+	}
+
+	if utils.CheckPasswordHashWithSalt(param.Password, user.Password, passwdKey) == false {
 		ctx.JSONErrLog(ecode.BadRequest("用户名或密码错误"), "password mismatch", "username", param.Username)
 		c.CreateSysLoginLog(ctx, model.LoginStatusFail, param.Username, "密码错误")
 		return
