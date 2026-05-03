@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -149,6 +150,46 @@ func loadConfigFile() {
 	err := v.Unmarshal(&config)
 	if err != nil {
 		log.Fatalf("failed to parse config file: %v", err)
+	}
+
+	// viper 的 AutomaticEnv 不会注入到 Unmarshal，所以在文件缺失时手动从环境变量回填
+	if config.ServerPort == "" {
+		if v := os.Getenv("SERVER_PORT"); v != "" {
+			config.ServerPort = v
+		}
+	}
+	if config.DBType == "" {
+		if v := os.Getenv("DB_TYPE"); v != "" {
+			config.DBType = v
+		}
+	}
+	if config.Postgres.Host == "" {
+		if v := os.Getenv("POSTGRES_HOST"); v != "" {
+			config.Postgres.Host = v
+		}
+	}
+	if config.Postgres.Port == 0 {
+		if v := os.Getenv("POSTGRES_PORT"); v != "" {
+			fmt.Sscanf(v, "%d", &config.Postgres.Port)
+		}
+	}
+	if config.Postgres.Username == "" {
+		config.Postgres.Username = os.Getenv("POSTGRES_USER")
+	}
+	if config.Postgres.Password == "" {
+		config.Postgres.Password = os.Getenv("POSTGRES_PASSWORD")
+	}
+	if config.Postgres.Database == "" {
+		config.Postgres.Database = os.Getenv("POSTGRES_DB")
+	}
+	if config.RedisConfig.Address == "" {
+		config.RedisConfig.Address = os.Getenv("REDIS_ADDR")
+	}
+	if config.RedisConfig.Password == "" {
+		config.RedisConfig.Password = os.Getenv("REDIS_PASSWORD")
+	}
+	if config.Upload.Dir == "" {
+		config.Upload.Dir = os.Getenv("UPLOAD_DIR")
 	}
 
 	// 兼容从环境变量注入的逗号分隔形式的 AllowedOrigins（旧字段）
