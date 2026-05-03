@@ -12,7 +12,9 @@ import (
 type Config struct {
 	ServerPort      string            // 服务端口
 	LogConfig       LogConfig         // 日志配置
-	MySQL           MySQLConfig       // mysql配置
+	MySQL           DBConfig          // mysql配置
+	Postgres        DBConfig          // postgres配置
+	DBType          string            // 数据库类型: mysql | postgres
 	TencentCloud    TencenCloudConfig // 腾讯云配置
 	PkgFileDir      string            // 包文件存放目录
 	UserInfoAddress string            // 用户信息地址
@@ -49,7 +51,7 @@ type LogConfig struct {
 	StacktraceLevel    string // 输出堆栈的级别（error|warn|panic 等）
 }
 
-type MySQLConfig struct {
+type DBConfig struct {
 	Host     string // 数据库地址
 	Port     int    // 数据库端口
 	Username string // 数据库用户名
@@ -218,6 +220,9 @@ func bindEnvs() {
 	viper.BindEnv("LogConfig.StacktraceLevel", "LOG_STACKTRACE_LEVEL")
 	viper.BindEnv("MySQL.Host", "MYSQL_HOST")
 	viper.BindEnv("MySQL.Port", "MYSQL_PORT")
+	viper.BindEnv("Postgres.Host", "POSTGRES_HOST")
+	viper.BindEnv("Postgres.Port", "POSTGRES_PORT")
+	viper.BindEnv("DBType", "DB_TYPE")
 	viper.BindEnv("AllowedOrigins", "ALLOWED_ORIGINS")
 	viper.BindEnv("PasswdKey", "PASSWD_KEY")
 	viper.BindEnv("Upload.Dir", "UPLOAD_DIR")

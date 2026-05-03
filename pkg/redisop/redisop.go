@@ -97,6 +97,34 @@ func (c *RedisClient) QueueLength(ctx context.Context, key string) (int64, error
 	return c.standaloneClient.LLen(ctx, key).Result()
 }
 
+// Incr atomically increments the integer value of key by 1 and returns the new value.
+func (c *RedisClient) Incr(ctx context.Context, key string) (int64, error) {
+	if c.isCluster {
+		return c.clusterClient.Incr(ctx, key).Result()
+	}
+	return c.standaloneClient.Incr(ctx, key).Result()
+}
+
+// Expire sets a timeout on key.
+func (c *RedisClient) Expire(ctx context.Context, key string, expiration time.Duration) error {
+	if c.isCluster {
+		return c.clusterClient.Expire(ctx, key, expiration).Err()
+	}
+	return c.standaloneClient.Expire(ctx, key, expiration).Err()
+}
+
+// Exists reports whether key exists.
+func (c *RedisClient) Exists(ctx context.Context, key string) (bool, error) {
+	var n int64
+	var err error
+	if c.isCluster {
+		n, err = c.clusterClient.Exists(ctx, key).Result()
+	} else {
+		n, err = c.standaloneClient.Exists(ctx, key).Result()
+	}
+	return n > 0, err
+}
+
 func (c *RedisClient) Close() error {
 	if c.isCluster {
 		return c.clusterClient.Close()

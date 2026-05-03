@@ -138,8 +138,10 @@ func NewAppFromConfig(cfg *config.Config) *App {
 		a.Config = config.GetConfig()
 	}
 
-	if a.Config.MySQL.Host != "" {
-		a.DB = db.GetDB(a.Config.MySQL)
+	if a.Config.DBType == "postgres" && a.Config.Postgres.Host != "" {
+		a.DB = db.GetDB("postgres", a.Config.Postgres)
+	} else if a.Config.MySQL.Host != "" {
+		a.DB = db.GetDB("mysql", a.Config.MySQL)
 	}
 
 	a.Logger = logger.NewLogger(a.Config.LogConfig)

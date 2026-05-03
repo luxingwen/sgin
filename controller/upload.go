@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/luxingwen/sgin/model"
 	"github.com/luxingwen/sgin/pkg/app"
@@ -91,14 +93,36 @@ func (u *UploadController) DeleteFile(ctx *app.Context) {
 		return
 	}
 
-	err := os.Remove(ctx.Config.Upload.Dir + param.Filename)
-	if err != nil {
+	srcPath := filepath.Join(ctx.Config.Upload.Dir, param.Filename)
+
+	// 先移动到回收目录，避免立即物理删除
+	recycleDir := filepath.Join(ctx.Config.Upload.Dir, ".recycle")
+	if err := os.MkdirAll(recycleDir, 0755); err != nil {
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "make recycle dir failed")
+		return
+	}
+
+	dest := filepath.Join(recycleDir, time.Now().Format("20060102T150405")+"_"+filepath.Base(param.Filename))
+	if err := os.Rename(srcPath, dest); err != nil {
 		if os.IsNotExist(err) {
 			ctx.Logger.Warnw("file not exist on delete", "filename", param.Filename)
 			ctx.JSONSuccess("删除文件成功")
 			return
 		}
-		ctx.JSONErrLog(ecode.InternalError(err.Error()), "remove file failed", "filename", param.Filename)
+		// fallback: attempt copy+remove
+		if in, err2 := os.Open(srcPath); err2 == nil {
+			defer in.Close()
+			out, err2 := os.Create(dest)
+			if err2 == nil {
+				defer out.Close()
+				if _, err2 = io.Copy(out, in); err2 == nil {
+					_ = os.Remove(srcPath)
+					ctx.JSONSuccess("删除文件成功")
+					return
+				}
+			}
+		}
+		ctx.JSONErrLog(ecode.InternalError(err.Error()), "move file to recycle failed", "filename", param.Filename)
 		return
 	}
 
