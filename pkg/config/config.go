@@ -140,7 +140,8 @@ func loadConfigFile() {
 	v.SetConfigFile(configFile)
 
 	if err := v.ReadInConfig(); err != nil {
-		log.Fatalf("failed to read config file: %v", err)
+		// 配置文件不存在时，回退到仅使用环境变量（容器化部署常见）
+		log.Printf("failed to read config file: %v, falling back to environment variables", err)
 	}
 
 	config = &Config{}
@@ -222,7 +223,13 @@ func bindEnvs() {
 	viper.BindEnv("MySQL.Port", "MYSQL_PORT")
 	viper.BindEnv("Postgres.Host", "POSTGRES_HOST")
 	viper.BindEnv("Postgres.Port", "POSTGRES_PORT")
+	viper.BindEnv("Postgres.Username", "POSTGRES_USER")
+	viper.BindEnv("Postgres.Password", "POSTGRES_PASSWORD")
+	viper.BindEnv("Postgres.Database", "POSTGRES_DB")
 	viper.BindEnv("DBType", "DB_TYPE")
+	viper.BindEnv("Redis.Address", "REDIS_ADDR")
+	viper.BindEnv("Redis.Password", "REDIS_PASSWORD")
+	viper.BindEnv("Redis.Database", "REDIS_DB")
 	viper.BindEnv("AllowedOrigins", "ALLOWED_ORIGINS")
 	viper.BindEnv("PasswdKey", "PASSWD_KEY")
 	viper.BindEnv("Upload.Dir", "UPLOAD_DIR")
